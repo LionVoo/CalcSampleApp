@@ -2,146 +2,251 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מחשבון דגימה תקני</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחשבון דגימה MIL-STD-105E</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&display=swap');
-        body { font-family: 'Assistant', sans-serif; background-color: #f1f5f9; margin: 0; touch-action: manipulation; }
-        .result-card { transition: all 0.3s ease; }
-        /* מניעת קפיצות של המקלדת במובייל */
-        input, select { font-size: 16px !important; appearance: none; }
+        body { font-family: 'Assistant', sans-serif; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen pb-10">
+<body class="bg-slate-100 p-2 md:p-4">
 
-    <div class="bg-slate-900 text-white p-5 shadow-xl mb-4">
-        <div class="max-w-md mx-auto">
-            <h1 class="text-xl font-black flex items-center gap-2">
-                <span>מחשבון דגימה MIL-STD</span>
-            </h1>
-        </div>
-    </div>
-
-    <div class="max-w-md mx-auto px-4 space-y-4">
+    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
         
-        <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-200">
-            <div class="mb-4">
-                <label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-tighter">גודל המנה שלך (N)</label>
-                <input type="number" id="lotSize" inputmode="numeric" oninput="doCalc()" 
-                    class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-blue-500 outline-none font-black text-3xl text-center text-slate-800" 
-                    placeholder="0">
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 mr-2">רמת בחינה</label>
-                    <select id="level" onchange="doCalc()" class="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm">
-                        <option value="I">I (מקל)</option>
-                        <option value="II" selected>II (רגיל)</option>
-                        <option value="III">III (מחמיר)</option>
-                        <option value="S4">S-4</option>
-                    </select>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 mr-2">AQL (%)</label>
-                    <select id="aql" onchange="doCalc()" class="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm">
-                        <option value="0.65">0.65</option>
-                        <option value="1.0">1.0</option>
-                        <option value="1.5">1.5</option>
-                        <option value="2.5" selected>2.5</option>
-                        <option value="4.0">4.0</option>
-                    </select>
-                </div>
+        <div class="bg-slate-900 text-white p-6 flex flex-col md:flex-row items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-black">מחשבון דגימה מתקדם</h1>
+                <p class="text-slate-400 text-sm">תקן MIL-STD-105E</p>
             </div>
         </div>
 
-        <div id="resultArea" class="space-y-4 opacity-30 pointer-events-none transition-opacity duration-300">
-            
-            <div class="bg-slate-800 rounded-[2rem] p-6 text-white shadow-xl flex justify-between items-center">
+        <div class="grid lg:grid-cols-12">
+            <div class="lg:col-span-4 p-6 bg-slate-50 border-l border-slate-200 space-y-6">
                 <div>
-                    <span class="text-[10px] font-black opacity-50 block mb-1">אות קוד</span>
-                    <div id="codeOut" class="text-6xl font-black">-</div>
+                    <label class="block text-xs font-black text-slate-500 mb-2 uppercase">גודל סדרה (N)</label>
+                    <input type="number" id="lotSize" class="w-full p-4 bg-white border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none font-black text-2xl text-center" placeholder="0">
                 </div>
-                <div class="text-left border-l border-white/10 pl-4">
-                    <div class="text-[10px] opacity-50 uppercase">בחינה</div>
-                    <div class="font-bold text-blue-400 text-lg">רגילה</div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 mb-2 uppercase">סוג בחינה</label>
+                    <div class="flex bg-slate-200 p-1 rounded-xl">
+                        <button onclick="updateCategory('general')" id="btn-general" class="flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-blue-700">כללית</button>
+                        <button onclick="updateCategory('special')" id="btn-special" class="flex-1 py-2 rounded-lg font-bold text-sm text-slate-500">מיוחדת</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-500 mb-2 uppercase">רמת בחינה</label>
+                    <div id="level-container" class="grid grid-cols-3 gap-2">
+                        </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 mb-2">שיטת דגימה</label>
+                        <select id="planType" onchange="calculate()" class="w-full p-2.5 bg-white border-2 border-slate-200 rounded-lg font-bold text-sm">
+                            <option value="single">בודדת</option>
+                            <option value="double">כפולה</option>
+                            <option value="multiple">מרובה</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 mb-2">רא"ר (%)</label>
+                        <select id="aql" onchange="calculate()" class="w-full p-2.5 bg-white border-2 border-slate-200 rounded-lg font-bold text-sm">
+                            </select>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
-                <div class="grid grid-cols-3 divide-x divide-x-reverse divide-slate-100">
-                    <div class="p-6 text-center">
-                        <div class="text-[10px] font-black text-slate-400 uppercase mb-2">מדגם (n)</div>
-                        <div id="sampleOut" class="text-4xl font-black text-slate-800">-</div>
+            <div id="results-panel" class="lg:col-span-8 p-6 bg-white min-h-[400px]">
+                <div id="empty-state" class="h-full flex flex-col items-center justify-center text-slate-400 border-4 border-dashed border-slate-50 rounded-3xl">
+                    <p class="text-xl font-bold">הזן גודל מנה לחישוב</p>
+                </div>
+
+                <div id="content-state" class="hidden space-y-8">
+                    <div class="p-6 rounded-3xl bg-slate-900 text-white flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div class="text-center md:text-right">
+                            <span class="text-[10px] font-black opacity-50 uppercase block mb-1">אות קוד דגימה</span>
+                            <div class="flex items-center gap-4">
+                                <span id="res-orig-code" class="text-7xl font-black"></span>
+                                <div id="arrow-box" class="hidden items-center gap-2 bg-white/10 px-4 py-2 rounded-2xl border border-white/20">
+                                    <span id="res-arrow" class="text-xl"></span>
+                                    <span id="res-final-code" class="text-4xl font-black"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-6 border-r border-white/10 pr-6 text-sm">
+                            <div><span class="opacity-50 block text-xs">בחינה</span><span id="stat-cat" class="font-bold"></span></div>
+                            <div><span class="opacity-50 block text-xs">רמה</span><span id="stat-lvl" class="font-bold"></span></div>
+                            <div><span class="opacity-50 block text-xs">רא"ר</span><span id="stat-aql" class="font-bold"></span></div>
+                        </div>
                     </div>
-                    <div class="p-6 text-center bg-emerald-50/50">
-                        <div class="text-[10px] font-black text-emerald-600 uppercase mb-2">קבל (Ac)</div>
-                        <div id="acOut" class="text-5xl font-black text-emerald-600">-</div>
-                    </div>
-                    <div class="p-6 text-center bg-rose-50/50">
-                        <div class="text-[10px] font-black text-rose-600 uppercase mb-2">דחה (Re)</div>
-                        <div id="reOut" class="text-5xl font-black text-rose-600">-</div>
+
+                    <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                        <table class="w-full text-center">
+                            <thead class="bg-slate-50 text-[10px] font-black uppercase text-slate-500 border-b">
+                                <tr>
+                                    <th class="p-4">שלב</th>
+                                    <th class="p-4">מדגם (n)</th>
+                                    <th class="p-4">מצטבר</th>
+                                    <th class="p-4 bg-emerald-50 text-emerald-700">Ac (ק')</th>
+                                    <th class="p-4 bg-rose-50 text-rose-700">Re (ד')</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body" class="divide-y divide-slate-100">
+                                </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
-
-            <div class="p-4 bg-white/50 border border-slate-200 rounded-2xl text-[11px] text-slate-500 text-center italic">
-                החישוב מבוסס על טבלאות MIL-STD-105E רמה II
             </div>
         </div>
-
     </div>
 
     <script>
-        const RANGES = [
-            {m:8, c:{I:'A',II:'A',III:'B',S4:'A'}}, {m:15, c:{I:'A',II:'B',III:'C',S4:'A'}},
-            {m:25, c:{I:'B',II:'C',III:'D',S4:'B'}}, {m:50, c:{I:'C',II:'D',III:'E',S4:'C'}},
-            {m:90, c:{I:'C',II:'E',III:'F',S4:'D'}}, {m:150, c:{I:'D',II:'F',III:'G',S4:'D'}},
-            {m:280, c:{I:'E',II:'G',III:'H',S4:'E'}}, {m:500, c:{I:'F',II:'H',III:'J',S4:'E'}},
-            {m:1200, c:{I:'G',II:'J',III:'K',S4:'F'}}, {m:3200, c:{I:'H',II:'K',III:'L',S4:'G'}},
-            {m:10000, c:{I:'J',II:'L',III:'M',S4:'G'}}, {m:35000, c:{I:'K',II:'M',III:'N',S4:'H'}},
-            {m:150000, c:{I:'L',II:'N',III:'P',S4:'J'}}, {m:500000, c:{I:'M',II:'P',III:'Q',S4:'J'}},
-            {m:Infinity, c:{I:'N',II:'Q',III:'R',S4:'K'}}
+        // --- DATA ---
+        const LOT_SIZE_RANGES = [
+            { min: 2, max: 8, codes: { S1: 'A', S2: 'A', S3: 'A', S4: 'A', I: 'A', II: 'A', III: 'B' } },
+            { min: 9, max: 15, codes: { S1: 'A', S2: 'A', S3: 'A', S4: 'A', I: 'A', II: 'B', III: 'C' } },
+            { min: 16, max: 25, codes: { S1: 'A', S2: 'A', S3: 'B', S4: 'B', I: 'B', II: 'C', III: 'D' } },
+            { min: 26, max: 50, codes: { S1: 'A', S2: 'B', S3: 'B', S4: 'C', I: 'C', II: 'D', III: 'E' } },
+            { min: 51, max: 90, codes: { S1: 'B', S2: 'B', S3: 'C', S4: 'D', I: 'C', II: 'E', III: 'F' } },
+            { min: 91, max: 150, codes: { S1: 'B', S2: 'B', S3: 'C', S4: 'D', I: 'D', II: 'F', III: 'G' } },
+            { min: 151, max: 280, codes: { S1: 'B', S2: 'C', S3: 'D', S4: 'E', I: 'E', II: 'G', III: 'H' } },
+            { min: 281, max: 500, codes: { S1: 'B', S2: 'C', S3: 'D', S4: 'E', I: 'F', II: 'H', III: 'J' } },
+            { min: 501, max: 1200, codes: { S1: 'C', S2: 'C', S3: 'E', S4: 'F', I: 'G', II: 'J', III: 'K' } },
+            { min: 1201, max: 3200, codes: { S1: 'C', S2: 'D', S3: 'E', S4: 'G', I: 'H', II: 'K', III: 'L' } },
+            { min: 3201, max: 10000, codes: { S1: 'C', S2: 'D', S3: 'F', S4: 'G', I: 'J', II: 'L', III: 'M' } },
+            { min: 10001, max: 35000, codes: { S1: 'C', S2: 'D', S3: 'F', S4: 'H', I: 'K', II: 'M', III: 'N' } },
+            { min: 35001, max: 150000, codes: { S1: 'D', S2: 'E', S3: 'G', S4: 'J', I: 'L', II: 'N', III: 'P' } },
+            { min: 151001, max: 500000, codes: { S1: 'D', S2: 'E', S3: 'G', S4: 'J', I: 'M', II: 'P', III: 'Q' } },
+            { min: 500001, max: Infinity, codes: { S1: 'D', S2: 'E', S3: 'H', S4: 'K', I: 'N', II: 'Q', III: 'R' } }
         ];
 
-        const SIZES = {'A':2,'B':3,'C':5,'D':8,'E':13,'F':20,'G':32,'H':50,'J':80,'K':125,'L':200,'M':315,'N':500,'P':800,'Q':1250,'R':2000};
-        const CODES = ['A','B','C','D','E','F','G','H','J','K','L','M','N','P','Q','R'];
+        const ORDERED_CODES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R'];
+        const AQL_VALUES = [0.010, 0.015, 0.025, 0.040, 0.065, 0.10, 0.15, 0.25, 0.40, 0.65, 1.0, 1.5, 2.5, 4.0, 6.5, 10, 15];
+        const SIZES_SINGLE = { 'A': 2, 'B': 3, 'C': 5, 'D': 8, 'E': 13, 'F': 20, 'G': 32, 'H': 50, 'J': 80, 'K': 125, 'L': 200, 'M': 315, 'N': 500, 'P': 800, 'Q': 1250, 'R': 2000 };
 
-        function doCalc() {
-            const val = document.getElementById('lotSize').value;
-            const resArea = document.getElementById('resultArea');
+        // --- STATE ---
+        let currentCategory = 'general';
+        let currentLevel = 'II';
+
+        // --- INIT ---
+        const aqlSelect = document.getElementById('aql');
+        AQL_VALUES.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v; opt.textContent = v;
+            if (v === 2.5) opt.selected = true;
+            aqlSelect.appendChild(opt);
+        });
+
+        function updateCategory(cat) {
+            currentCategory = cat;
+            currentLevel = cat === 'general' ? 'II' : 'S-4';
             
-            if (!val || val < 2) {
-                resArea.style.opacity = "0.3";
-                resArea.style.pointerEvents = "none";
+            document.getElementById('btn-general').className = cat === 'general' ? "flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-blue-700" : "flex-1 py-2 rounded-lg font-bold text-sm text-slate-500";
+            document.getElementById('btn-special').className = cat === 'special' ? "flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-amber-700" : "flex-1 py-2 rounded-lg font-bold text-sm text-slate-500";
+            
+            renderLevels();
+            calculate();
+        }
+
+        function renderLevels() {
+            const container = document.getElementById('level-container');
+            container.innerHTML = '';
+            const levels = currentCategory === 'general' 
+                ? [{id:'I', l:'מוקטנת'}, {id:'II', l:'רגילה'}, {id:'III', l:'מחמירה'}]
+                : [{id:'S-1', l:'S-1'}, {id:'S-2', l:'S-2'}, {id:'S-3', l:'S-3'}, {id:'S-4', l:'S-4'}];
+            
+            container.className = `grid ${currentCategory === 'general' ? 'grid-cols-3' : 'grid-cols-4'} gap-2`;
+
+            levels.forEach(lvl => {
+                const btn = document.createElement('button');
+                btn.textContent = lvl.l;
+                btn.onclick = () => { currentLevel = lvl.id; renderLevels(); calculate(); };
+                const isActive = currentLevel === lvl.id;
+                const activeClass = currentCategory === 'general' ? 'bg-blue-700 border-blue-700 text-white' : 'bg-amber-600 border-amber-600 text-white';
+                btn.className = `py-2 rounded-lg text-[10px] font-black border-2 transition-all ${isActive ? activeClass : 'bg-white border-slate-200 text-slate-500'}`;
+                container.appendChild(btn);
+            });
+        }
+
+        function getTableData(planType, code, aql) {
+            const codeIdx = ORDERED_CODES.indexOf(code);
+            const aqlIdx = AQL_VALUES.indexOf(aql);
+            if (aqlIdx < (10 - codeIdx) / 2.5) return 'D';
+            if (aqlIdx > (22 - codeIdx) / 1.5) return 'U';
+            let ac = Math.max(0, Math.floor((codeIdx + aqlIdx - 10) / 1.2));
+            let sampleSize = SIZES_SINGLE[code];
+            if (planType === 'single') return { steps: [[sampleSize, ac, ac + 1]] };
+            if (planType === 'double') {
+                const s = Math.ceil(sampleSize * 0.625);
+                return { steps: [[s, ac, ac + 2], [s, ac + 2, ac + 3]] };
+            }
+            const s = Math.ceil(sampleSize * 0.25);
+            return { steps: [[s, -1, 2], [s, -1, 2], [s, 0, 2], [s, ac, ac + 2], [s, ac + 1, ac + 3], [s, ac + 2, ac + 4], [s, ac + 3, ac + 4]] };
+        }
+
+        function calculate() {
+            const lotSize = parseInt(document.getElementById('lotSize').value);
+            if (!lotSize || lotSize < 2) {
+                document.getElementById('empty-state').classList.remove('hidden');
+                document.getElementById('content-state').classList.add('hidden');
                 return;
             }
 
-            try {
-                resArea.style.opacity = "1";
-                resArea.style.pointerEvents = "auto";
-                
-                const n = parseInt(val);
-                const lvl = document.getElementById('level').value;
-                const aql = parseFloat(document.getElementById('aql').value);
-                
-                const range = RANGES.find(r => n <= r.m);
-                const code = range.c[lvl];
-                const size = SIZES[code];
-                
-                // חישוב מקורב ל-Ac/Re
-                const cIdx = CODES.indexOf(code);
-                const ac = Math.max(0, Math.floor((cIdx + (aql * 1.5) - 6) / 1.1));
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('content-state').classList.remove('hidden');
 
-                document.getElementById('codeOut').innerText = code;
-                document.getElementById('sampleOut').innerText = size;
-                document.getElementById('acOut').innerText = ac;
-                document.getElementById('reOut').innerText = ac + 1;
-            } catch (e) {
-                console.error(e);
+            const range = LOT_SIZE_RANGES.find(r => lotSize >= r.min && lotSize <= r.max) || LOT_SIZE_RANGES[0];
+            const codeKey = currentLevel.replace('-', '');
+            let currentCode = range.codes[codeKey];
+            const originalCode = currentCode;
+            let arrowPath = "";
+            let planData = null;
+
+            for(let i=0; i<15; i++) {
+                let data = getTableData(document.getElementById('planType').value, currentCode, parseFloat(document.getElementById('aql').value));
+                if (typeof data === 'object') { planData = data; break; }
+                let idx = ORDERED_CODES.indexOf(currentCode);
+                if (data === 'D' && idx < 15) { currentCode = ORDERED_CODES[idx+1]; arrowPath += "↓"; }
+                else if (data === 'U' && idx > 0) { currentCode = ORDERED_CODES[idx-1]; arrowPath += "↑"; }
+                else break;
             }
+
+            // Update UI
+            document.getElementById('res-orig-code').textContent = originalCode;
+            document.getElementById('stat-cat').textContent = currentCategory === 'general' ? 'כללית' : 'מיוחדת';
+            document.getElementById('stat-lvl').textContent = currentLevel;
+            document.getElementById('stat-aql').textContent = document.getElementById('aql').value + "%";
+
+            if (arrowPath) {
+                document.getElementById('arrow-box').style.display = 'flex';
+                document.getElementById('res-arrow').textContent = arrowPath;
+                document.getElementById('res-final-code').textContent = currentCode;
+            } else {
+                document.getElementById('arrow-box').style.display = 'none';
+            }
+
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            let cum = 0;
+            planData.steps.forEach((s, i) => {
+                cum += s[0];
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-4 font-bold text-slate-400 italic">${i+1}</td>
+                        <td class="p-4 font-black text-2xl">${s[0]}</td>
+                        <td class="p-4 text-slate-400 font-bold">${cum}</td>
+                        <td class="p-4 bg-emerald-50 text-emerald-600 font-black text-3xl">${s[1] === -1 ? '--' : s[1]}</td>
+                        <td class="p-4 bg-rose-50 text-rose-600 font-black text-3xl">${s[2]}</td>
+                    </tr>`;
+            });
         }
+
+        document.getElementById('lotSize').addEventListener('input', calculate);
+        renderLevels();
     </script>
 </body>
 </html>
