@@ -9,37 +9,21 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap');
-        body { 
-            font-family: 'Assistant', sans-serif; 
-            background-color: #f1f5f9;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-        /* התאמות מיוחדות למובייל */
-        .mobile-scroll {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        input, select, button {
-            font-size: 16px !important; /* מונע זום אוטומטי מעצבן באייפון */
-        }
+        body { font-family: 'Assistant', sans-serif; background-color: #f1f5f9; margin: 0; }
+        .mobile-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        input { font-size: 16px !important; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        // רכיב אייקון יציב למובייל
         const Icon = ({ name, className = "" }) => {
-            React.useEffect(() => {
-                if (window.lucide) window.lucide.createIcons();
-            }, [name]);
+            React.useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [name]);
             return <i data-lucide={name} className={`${className} inline-block`}></i>;
         };
 
@@ -86,80 +70,80 @@
         };
 
         function App() {
-          const [lotSize, setLotSize] = React.useState('');
+          const [lotSizeInput, setLotSizeInput] = React.useState('');
           const [category, setCategory] = React.useState('general');
           const [level, setLevel] = React.useState('II');
           const [planType, setPlanType] = React.useState('single');
           const [aql, setAql] = React.useState(2.5);
 
-          const isLotSizeValid = lotSize !== '' && parseInt(lotSize) >= 2;
+          const lotSize = parseInt(lotSizeInput);
+          const isLotSizeValid = !isNaN(lotSize) && lotSize >= 2;
 
           const result = React.useMemo(() => {
             if (!isLotSizeValid) return null;
-            const range = LOT_SIZE_RANGES.find(r => lotSize >= r.min && lotSize <= r.max);
-            const codeKey = level.replace('-', ''); 
-            const originalCode = range ? range.codes[codeKey] : 'A';
-            let currentCode = originalCode;
-            let planData = null;
-            let arrowPath = [];
-            let attempts = 0;
+            try {
+                const range = LOT_SIZE_RANGES.find(r => lotSize >= r.min && lotSize <= r.max);
+                const codeKey = level.replace('-', ''); 
+                const originalCode = range ? range.codes[codeKey] : 'A';
+                let currentCode = originalCode;
+                let planData = null;
+                let arrowPath = [];
+                let attempts = 0;
 
-            while (attempts < 15) {
-              let data = getTableData(planType, currentCode, aql);
-              if (typeof data === 'object' && data !== null) { planData = data; break; }
-              else if (data === 'D') {
-                let idx = ORDERED_CODES.indexOf(currentCode);
-                if (idx < ORDERED_CODES.length - 1) { currentCode = ORDERED_CODES[idx + 1]; arrowPath.push('↓'); }
-                else break;
-              } else if (data === 'U') {
-                let idx = ORDERED_CODES.indexOf(currentCode);
-                if (idx > 0) { currentCode = ORDERED_CODES[idx - 1]; arrowPath.push('↑'); }
-                else break;
-              }
-              attempts++;
-            }
+                while (attempts < 15) {
+                  let data = getTableData(planType, currentCode, aql);
+                  if (typeof data === 'object' && data !== null) { planData = data; break; }
+                  else if (data === 'D') {
+                    let idx = ORDERED_CODES.indexOf(currentCode);
+                    if (idx < ORDERED_CODES.length - 1) { currentCode = ORDERED_CODES[idx + 1]; arrowPath.push('↓'); }
+                    else break;
+                  } else if (data === 'U') {
+                    let idx = ORDERED_CODES.indexOf(currentCode);
+                    if (idx > 0) { currentCode = ORDERED_CODES[idx - 1]; arrowPath.push('↑'); }
+                    else break;
+                  }
+                  attempts++;
+                }
 
-            let steps = [];
-            if (planData) {
-              let cum = 0;
-              planData.steps.forEach((s, i) => {
-                const [size, ac, re] = s;
-                cum += size;
-                steps.push({ step: i + 1, size, cum, ac: ac === -1 ? '#' : ac, re });
-              });
-            }
-            return { originalCode, finalCode: currentCode, arrowPath: arrowPath.join(' '), steps };
+                let steps = [];
+                if (planData) {
+                  let cum = 0;
+                  planData.steps.forEach((s, i) => {
+                    const [size, ac, re] = s;
+                    cum += size;
+                    steps.push({ step: i + 1, size, cum, ac: ac === -1 ? '#' : ac, re });
+                  });
+                }
+                return { originalCode, finalCode: currentCode, arrowPath: arrowPath.join(' '), steps };
+            } catch(e) { return null; }
           }, [lotSize, level, planType, aql, isLotSizeValid]);
 
           return (
             <div className="min-h-screen pb-10">
-              {/* Header */}
-              <div className="bg-slate-900 text-white p-6 shadow-lg">
+              <div className="bg-slate-900 text-white p-4 md:p-6 shadow-lg">
                  <div className="max-w-6xl mx-auto flex items-center gap-3">
                     <Icon name="clipboard-check" className="text-blue-400 w-6 h-6" />
-                    <h1 className="text-xl font-black">מחשבון דגימה</h1>
+                    <h1 className="text-xl font-black">מחשבון דגימה מתקדם</h1>
                  </div>
               </div>
 
               <div className="max-w-6xl mx-auto p-4 md:p-6 grid lg:grid-cols-12 gap-6">
-                
-                {/* Inputs Area */}
-                <div className="lg:col-span-4 space-y-5 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <div className="lg:col-span-4 space-y-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
                   <div>
-                    <label className="block text-xs font-black text-slate-500 mb-2 uppercase tracking-widest">גודל מנה (N)</label>
+                    <label className="block text-xs font-black text-slate-500 mb-2 uppercase">גודל מנה (N)</label>
                     <input 
                       type="number" 
                       inputMode="numeric"
-                      value={lotSize} 
-                      onChange={(e) => setLotSize(e.target.value)} 
+                      value={lotSizeInput} 
+                      onChange={(e) => setLotSizeInput(e.target.value)} 
                       className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-blue-500 outline-none font-black text-2xl text-center" 
-                      placeholder="הזן מספר"
+                      placeholder="הזן מספר..."
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <button onClick={() => {setCategory('general'); setLevel('II')}} className={`py-3 rounded-xl font-bold text-sm border-2 transition-all ${category === 'general' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white border-slate-100 text-slate-400'}`}>כללית</button>
-                    <button onClick={() => {setCategory('special'); setLevel('S-4')}} className={`py-3 rounded-xl font-bold text-sm border-2 transition-all ${category === 'special' ? 'bg-amber-50 border-amber-500 text-amber-700' : 'bg-white border-slate-100 text-slate-400'}`}>מיוחדת</button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => {setCategory('general'); setLevel('II')}} className={`py-3 rounded-xl font-bold text-xs border-2 transition-all ${category === 'general' ? 'bg-blue-700 border-blue-700 text-white shadow-md' : 'bg-white border-slate-100 text-slate-400'}`}>כללית</button>
+                    <button onClick={() => {setCategory('special'); setLevel('S-4')}} className={`py-3 rounded-xl font-bold text-xs border-2 transition-all ${category === 'special' ? 'bg-amber-600 border-amber-600 text-white shadow-md' : 'bg-white border-slate-100 text-slate-400'}`}>מיוחדת</button>
                   </div>
 
                   <div className="grid grid-cols-4 gap-2">
@@ -168,78 +152,62 @@
                     ))}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-slate-400">שיטה</span>
-                      <select value={planType} onChange={(e) => setPlanType(e.target.value)} className="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm">
-                        <option value="single">בודדת</option>
-                        <option value="double">כפולה</option>
-                        <option value="multiple">מרובה</option>
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-slate-400">AQL (%)</span>
-                      <select value={aql} onChange={(e) => setAql(parseFloat(e.target.value))} className="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm">
-                        {AQL_VALUES.map(v => <option key={v} value={v}>{v}%</option>)}
-                      </select>
-                    </div>
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t">
+                    <select value={planType} onChange={(e) => setPlanType(e.target.value)} className="p-3 bg-slate-50 rounded-xl font-bold text-xs outline-none">
+                      <option value="single">בודדת</option>
+                      <option value="double">כפולה</option>
+                      <option value="multiple">מרובה</option>
+                    </select>
+                    <select value={aql} onChange={(e) => setAql(parseFloat(e.target.value))} className="p-3 bg-slate-50 rounded-xl font-bold text-xs outline-none">
+                      {AQL_VALUES.map(v => <option key={v} value={v}>{v}% AQL</option>)}
+                    </select>
                   </div>
                 </div>
 
-                {/* Results Area */}
                 <div className="lg:col-span-8">
                   {!isLotSizeValid ? (
-                    <div className="h-40 flex flex-col items-center justify-center bg-white rounded-3xl border-2 border-dashed border-slate-200 text-slate-300">
-                      <Icon name="mouse-pointer-2" className="w-8 h-8 mb-2" />
-                      <p className="font-bold">המתנה לנתונים...</p>
+                    <div className="h-64 flex flex-col items-center justify-center bg-white rounded-3xl border-2 border-dashed border-slate-200 text-slate-400 space-y-3">
+                      <Icon name="search" className="w-10 h-10 opacity-20" />
+                      <p className="font-bold text-sm">המתנה לגודל מנה תקין (מינימום 2)</p>
                     </div>
                   ) : (
-                    <div className="space-y-6">
-                      {/* Code Hero */}
-                      <div className="bg-slate-900 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden">
-                        <div className="flex justify-between items-center relative z-10">
-                          <div>
-                             <span className="text-[10px] font-black opacity-50 block mb-1 uppercase tracking-widest">אות קוד דגימה</span>
-                             <div className="flex items-center gap-3">
-                                <span className="text-7xl font-black">{result.originalCode}</span>
-                                {result.arrowPath && (
-                                  <div className="bg-white/10 px-4 py-2 rounded-2xl border border-white/20 flex items-center gap-2">
-                                    <span className="text-xl animate-pulse text-blue-400">{result.arrowPath}</span>
-                                    <span className="text-4xl font-black">{result.finalCode}</span>
-                                  </div>
-                                )}
-                             </div>
-                          </div>
-                          <div className="text-left hidden sm:block">
-                             <Icon name="shield-check" className="w-12 h-12 text-blue-500/30" />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Main Table Card */}
-                      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-                        <div className="bg-slate-50 px-6 py-4 border-b flex justify-between items-center font-black text-sm text-slate-700">
-                           <div className="flex items-center gap-2">
-                              <Icon name="layers" className="w-4 h-4 text-blue-500" />
-                              <span>תוכנית דגימה {planType === 'single' ? 'בודדת' : 'מורחבת'}</span>
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      <div className="bg-slate-900 rounded-[2rem] p-6 text-white shadow-xl flex justify-between items-center">
+                        <div>
+                           <span className="text-[10px] font-black opacity-40 block mb-1 tracking-widest uppercase">Sampling Code</span>
+                           <div className="flex items-center gap-4">
+                              <span className="text-7xl font-black leading-none">{result.originalCode}</span>
+                              {result.arrowPath && (
+                                <div className="bg-white/10 px-4 py-2 rounded-2xl border border-white/20 flex items-center gap-3">
+                                  <span className="text-xl animate-pulse text-blue-400">{result.arrowPath}</span>
+                                  <span className="text-4xl font-black">{result.finalCode}</span>
+                                </div>
+                              )}
                            </div>
                         </div>
+                        <div className="hidden sm:block opacity-20"><Icon name="database" className="w-16 h-16" /></div>
+                      </div>
+
+                      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+                        <div className="bg-slate-50 px-6 py-4 border-b font-black text-xs text-slate-500 uppercase flex items-center gap-2">
+                           <Icon name="table" className="w-4 h-4" /> תוכנית דגימה {planType}
+                        </div>
                         <div className="mobile-scroll">
-                          <table className="w-full text-center min-w-[400px]">
+                          <table className="w-full text-center min-w-[350px]">
                             <thead>
-                              <tr className="text-slate-400 text-[10px] font-black uppercase border-b bg-slate-50/50">
-                                <th className="p-4">שלב</th>
-                                <th className="p-4">מדגם (n)</th>
-                                <th className="p-4 bg-emerald-50 text-emerald-700 font-bold">Ac</th>
-                                <th className="p-4 bg-rose-50 text-rose-700 font-bold">Re</th>
+                              <tr className="text-slate-400 text-[10px] font-black border-b bg-slate-50/30">
+                                <th className="p-4 uppercase">Step</th>
+                                <th className="p-4 uppercase">Sample (n)</th>
+                                <th className="p-4 bg-emerald-50 text-emerald-700 uppercase">Ac</th>
+                                <th className="p-4 bg-rose-50 text-rose-700 uppercase">Re</th>
                               </tr>
                             </thead>
                             <tbody>
                               {result.steps.map((s, i) => (
-                                <tr key={i} className="border-b last:border-0">
+                                <tr key={i} className="border-b last:border-0 hover:bg-slate-50 transition-colors">
                                   <td className="p-4 text-slate-300 font-bold italic">{s.step}</td>
                                   <td className="p-4">
-                                     <div className="font-black text-2xl text-slate-800">{s.size}</div>
+                                     <div className="font-black text-2xl text-slate-800 leading-tight">{s.size}</div>
                                      <div className="text-[9px] text-slate-400 font-bold">מצטבר: {s.cum}</div>
                                   </td>
                                   <td className="p-4 bg-emerald-50/30 font-black text-3xl text-emerald-600">{s.ac}</td>
@@ -249,14 +217,6 @@
                             </tbody>
                           </table>
                         </div>
-                      </div>
-
-                      {/* Info Footer */}
-                      <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex gap-3 items-start">
-                         <Icon name="info" className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                         <p className="text-xs text-blue-800 leading-relaxed font-medium">
-                           החישוב מתבצע לפי טבלאות <b>MIL-STD-105E</b> לבחינה רגילה. במידה ומופיע חץ, המערכת עוקבת אחריו אוטומטית לאות הקוד המתאימה.
-                         </p>
                       </div>
                     </div>
                   )}
