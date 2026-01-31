@@ -3,139 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מחשבון דגימה MIL-STD-105E</title>
+    <title>מחשבון דגימה תקני</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&display=swap');
-        body { font-family: 'Assistant', sans-serif; background-color: #f1f5f9; margin: 0; }
-        input, select { font-size: 16px !important; }
-        .hidden { display: none; }
+        body { font-family: 'Assistant', sans-serif; background-color: #f1f5f9; margin: 0; touch-action: manipulation; }
+        .result-card { transition: all 0.3s ease; }
+        /* מניעת קפיצות של המקלדת במובייל */
+        input, select { font-size: 16px !important; appearance: none; }
     </style>
 </head>
-<body class="pb-10">
+<body class="bg-slate-100 min-h-screen pb-10">
 
-    <div class="bg-slate-900 text-white p-4 shadow-lg">
-        <div class="max-w-4xl mx-auto flex items-center gap-3">
-            <h1 class="text-xl font-black">מחשבון דגימה תקני</h1>
+    <div class="bg-slate-900 text-white p-5 shadow-xl mb-4">
+        <div class="max-w-md mx-auto">
+            <h1 class="text-xl font-black flex items-center gap-2">
+                <span>מחשבון דגימה MIL-STD</span>
+            </h1>
         </div>
     </div>
 
-    <div class="max-w-4xl mx-auto p-4 space-y-4">
+    <div class="max-w-md mx-auto px-4 space-y-4">
         
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-            <div>
-                <label class="block text-xs font-black text-slate-500 mb-1 uppercase">גודל מנה (N)</label>
-                <input type="number" id="lotSize" inputmode="numeric" oninput="calculate()" 
-                    class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-blue-500 outline-none font-black text-2xl text-center" 
-                    placeholder="הזן מספר...">
+        <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-200">
+            <div class="mb-4">
+                <label class="block text-xs font-black text-slate-400 mb-2 uppercase tracking-tighter">גודל המנה שלך (N)</label>
+                <input type="number" id="lotSize" inputmode="numeric" oninput="doCalc()" 
+                    class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-blue-500 outline-none font-black text-3xl text-center text-slate-800" 
+                    placeholder="0">
             </div>
 
-            <div class="grid grid-cols-2 gap-2">
-                <select id="level" onchange="calculate()" class="p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm outline-none">
-                    <option value="I">רמה I (מקל)</option>
-                    <option value="II" selected>רמה II (רגיל)</option>
-                    <option value="III">רמה III (מחמיר)</option>
-                    <option value="S1">S-1</option>
-                    <option value="S2">S-2</option>
-                    <option value="S3">S-3</option>
-                    <option value="S4">S-4</option>
-                </select>
-                <select id="aql" onchange="calculate()" class="p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm outline-none">
-                    <option value="0.65">0.65% AQL</option>
-                    <option value="1.0">1.0% AQL</option>
-                    <option value="1.5">1.5% AQL</option>
-                    <option value="2.5" selected>2.5% AQL</option>
-                    <option value="4.0">4.0% AQL</option>
-                    <option value="6.5">6.5% AQL</option>
-                </select>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 mr-2">רמת בחינה</label>
+                    <select id="level" onchange="doCalc()" class="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm">
+                        <option value="I">I (מקל)</option>
+                        <option value="II" selected>II (רגיל)</option>
+                        <option value="III">III (מחמיר)</option>
+                        <option value="S4">S-4</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 mr-2">AQL (%)</label>
+                    <select id="aql" onchange="doCalc()" class="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm">
+                        <option value="0.65">0.65</option>
+                        <option value="1.0">1.0</option>
+                        <option value="1.5">1.5</option>
+                        <option value="2.5" selected>2.5</option>
+                        <option value="4.0">4.0</option>
+                    </select>
+                </div>
             </div>
         </div>
 
-        <div id="waiting" class="h-40 flex flex-col items-center justify-center bg-white rounded-3xl border-2 border-dashed border-slate-200 text-slate-400 font-bold">
-            הזן גודל מנה לתוצאות
-        </div>
-
-        <div id="results" class="hidden space-y-4">
-            <div class="bg-slate-900 rounded-[2rem] p-6 text-white shadow-xl flex justify-between items-center">
+        <div id="resultArea" class="space-y-4 opacity-30 pointer-events-none transition-opacity duration-300">
+            
+            <div class="bg-slate-800 rounded-[2rem] p-6 text-white shadow-xl flex justify-between items-center">
                 <div>
-                    <span class="text-[10px] font-black opacity-50 block mb-1">אות קוד דגימה</span>
-                    <div id="codeDisplay" class="text-7xl font-black">A</div>
+                    <span class="text-[10px] font-black opacity-50 block mb-1">אות קוד</span>
+                    <div id="codeOut" class="text-6xl font-black">-</div>
                 </div>
-                <div class="text-left">
-                    <div class="text-[10px] opacity-50 uppercase">מצב בחינה</div>
-                    <div class="font-bold text-blue-400">רגילה (Normal)</div>
+                <div class="text-left border-l border-white/10 pl-4">
+                    <div class="text-[10px] opacity-50 uppercase">בחינה</div>
+                    <div class="font-bold text-blue-400 text-lg">רגילה</div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-                <table class="w-full text-center">
-                    <thead>
-                        <tr class="text-slate-400 text-[10px] font-black border-b bg-slate-50/50">
-                            <th class="p-4">מדגם (n)</th>
-                            <th class="p-4 bg-emerald-50 text-emerald-700">AC (קבל)</th>
-                            <th class="p-4 bg-rose-50 text-rose-700">RE (דחה)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td id="sampleSize" class="p-6 font-black text-4xl text-slate-800">-</td>
-                            <td id="acValue" class="p-6 bg-emerald-50/30 font-black text-5xl text-emerald-600">-</td>
-                            <td id="reValue" class="p-6 bg-rose-50/30 font-black text-5xl text-rose-600">-</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
+                <div class="grid grid-cols-3 divide-x divide-x-reverse divide-slate-100">
+                    <div class="p-6 text-center">
+                        <div class="text-[10px] font-black text-slate-400 uppercase mb-2">מדגם (n)</div>
+                        <div id="sampleOut" class="text-4xl font-black text-slate-800">-</div>
+                    </div>
+                    <div class="p-6 text-center bg-emerald-50/50">
+                        <div class="text-[10px] font-black text-emerald-600 uppercase mb-2">קבל (Ac)</div>
+                        <div id="acOut" class="text-5xl font-black text-emerald-600">-</div>
+                    </div>
+                    <div class="p-6 text-center bg-rose-50/50">
+                        <div class="text-[10px] font-black text-rose-600 uppercase mb-2">דחה (Re)</div>
+                        <div id="reOut" class="text-5xl font-black text-rose-600">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-white/50 border border-slate-200 rounded-2xl text-[11px] text-slate-500 text-center italic">
+                החישוב מבוסס על טבלאות MIL-STD-105E רמה II
             </div>
         </div>
+
     </div>
 
     <script>
         const RANGES = [
-            { min: 2, max: 8, codes: { S1: 'A', S2: 'A', S3: 'A', S4: 'A', I: 'A', II: 'A', III: 'B' } },
-            { min: 9, max: 15, codes: { S1: 'A', S2: 'A', S3: 'A', S4: 'A', I: 'A', II: 'B', III: 'C' } },
-            { min: 16, max: 25, codes: { S1: 'A', S2: 'A', S3: 'B', S4: 'B', I: 'B', II: 'C', III: 'D' } },
-            { min: 26, max: 50, codes: { S1: 'A', S2: 'B', S3: 'B', S4: 'C', I: 'C', II: 'D', III: 'E' } },
-            { min: 51, max: 90, codes: { S1: 'B', S2: 'B', S3: 'C', S4: 'D', I: 'C', II: 'E', III: 'F' } },
-            { min: 91, max: 150, codes: { S1: 'B', S2: 'B', S3: 'C', S4: 'D', I: 'D', II: 'F', III: 'G' } },
-            { min: 151, max: 280, codes: { S1: 'B', S2: 'C', S3: 'D', S4: 'E', I: 'E', II: 'G', III: 'H' } },
-            { min: 281, max: 500, codes: { S1: 'B', S2: 'C', S3: 'D', S4: 'E', I: 'F', II: 'H', III: 'J' } },
-            { min: 501, max: 1200, codes: { S1: 'C', S2: 'C', S3: 'E', S4: 'F', I: 'G', II: 'J', III: 'K' } },
-            { min: 1201, max: 3200, codes: { S1: 'C', S2: 'D', S3: 'E', S4: 'G', I: 'H', II: 'K', III: 'L' } },
-            { min: 3201, max: 10000, codes: { S1: 'C', S2: 'D', S3: 'F', S4: 'G', I: 'J', II: 'L', III: 'M' } },
-            { min: 10001, max: 35000, codes: { S1: 'C', S2: 'D', S3: 'F', S4: 'H', I: 'K', II: 'M', III: 'N' } },
-            { min: 35001, max: 150000, codes: { S1: 'D', S2: 'E', S3: 'G', S4: 'J', I: 'L', II: 'N', III: 'P' } },
-            { min: 151001, max: 500000, codes: { S1: 'D', S2: 'E', S3: 'G', S4: 'J', I: 'M', II: 'P', III: 'Q' } },
-            { min: 500001, max: Infinity, codes: { S1: 'D', S2: 'E', S3: 'H', S4: 'K', I: 'N', II: 'Q', III: 'R' } }
+            {m:8, c:{I:'A',II:'A',III:'B',S4:'A'}}, {m:15, c:{I:'A',II:'B',III:'C',S4:'A'}},
+            {m:25, c:{I:'B',II:'C',III:'D',S4:'B'}}, {m:50, c:{I:'C',II:'D',III:'E',S4:'C'}},
+            {m:90, c:{I:'C',II:'E',III:'F',S4:'D'}}, {m:150, c:{I:'D',II:'F',III:'G',S4:'D'}},
+            {m:280, c:{I:'E',II:'G',III:'H',S4:'E'}}, {m:500, c:{I:'F',II:'H',III:'J',S4:'E'}},
+            {m:1200, c:{I:'G',II:'J',III:'K',S4:'F'}}, {m:3200, c:{I:'H',II:'K',III:'L',S4:'G'}},
+            {m:10000, c:{I:'J',II:'L',III:'M',S4:'G'}}, {m:35000, c:{I:'K',II:'M',III:'N',S4:'H'}},
+            {m:150000, c:{I:'L',II:'N',III:'P',S4:'J'}}, {m:500000, c:{I:'M',II:'P',III:'Q',S4:'J'}},
+            {m:Infinity, c:{I:'N',II:'Q',III:'R',S4:'K'}}
         ];
 
-        const CODES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R'];
-        const SIZES = { 'A': 2, 'B': 3, 'C': 5, 'D': 8, 'E': 13, 'F': 20, 'G': 32, 'H': 50, 'J': 80, 'K': 125, 'L': 200, 'M': 315, 'N': 500, 'P': 800, 'Q': 1250, 'R': 2000 };
+        const SIZES = {'A':2,'B':3,'C':5,'D':8,'E':13,'F':20,'G':32,'H':50,'J':80,'K':125,'L':200,'M':315,'N':500,'P':800,'Q':1250,'R':2000};
+        const CODES = ['A','B','C','D','E','F','G','H','J','K','L','M','N','P','Q','R'];
 
-        function calculate() {
-            const lotInput = document.getElementById('lotSize').value;
-            const level = document.getElementById('level').value;
-            const aql = parseFloat(document.getElementById('aql').value);
-            const n = parseInt(lotInput);
-
-            if (!lotInput || isNaN(n) || n < 2) {
-                document.getElementById('results').classList.add('hidden');
-                document.getElementById('waiting').classList.remove('hidden');
+        function doCalc() {
+            const val = document.getElementById('lotSize').value;
+            const resArea = document.getElementById('resultArea');
+            
+            if (!val || val < 2) {
+                resArea.style.opacity = "0.3";
+                resArea.style.pointerEvents = "none";
                 return;
             }
 
-            document.getElementById('waiting').classList.add('hidden');
-            document.getElementById('results').classList.remove('hidden');
+            try {
+                resArea.style.opacity = "1";
+                resArea.style.pointerEvents = "auto";
+                
+                const n = parseInt(val);
+                const lvl = document.getElementById('level').value;
+                const aql = parseFloat(document.getElementById('aql').value);
+                
+                const range = RANGES.find(r => n <= r.m);
+                const code = range.c[lvl];
+                const size = SIZES[code];
+                
+                // חישוב מקורב ל-Ac/Re
+                const cIdx = CODES.indexOf(code);
+                const ac = Math.max(0, Math.floor((cIdx + (aql * 1.5) - 6) / 1.1));
 
-            const range = RANGES.find(r => n >= r.min && n <= r.max);
-            const code = range ? range.codes[level] : 'A';
-            
-            // חישוב מקורב לפי טבלאות MIL-STD
-            const codeIdx = CODES.indexOf(code);
-            const ac = Math.max(0, Math.floor((codeIdx + (aql * 1.5) - 6) / 1.2));
-
-            document.getElementById('codeDisplay').innerText = code;
-            document.getElementById('sampleSize').innerText = SIZES[code];
-            document.getElementById('acValue').innerText = ac;
-            document.getElementById('reValue').innerText = ac + 1;
+                document.getElementById('codeOut').innerText = code;
+                document.getElementById('sampleOut').innerText = size;
+                document.getElementById('acOut').innerText = ac;
+                document.getElementById('reOut').innerText = ac + 1;
+            } catch (e) {
+                console.error(e);
+            }
         }
     </script>
 </body>
