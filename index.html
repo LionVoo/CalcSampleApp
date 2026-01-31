@@ -2,34 +2,45 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מחשבון דגימה מתקדם MIL-STD-105E</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>מחשבון דגימה MIL-STD-105E</title>
     
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700;800&display=swap');
-        body { font-family: 'Assistant', sans-serif; background-color: #f1f5f9; }
-        .lucide { width: 1em; height: 1em; vertical-align: middle; display: inline-block; }
+        body { 
+            font-family: 'Assistant', sans-serif; 
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* התאמות מיוחדות למובייל */
+        .mobile-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        input, select, button {
+            font-size: 16px !important; /* מונע זום אוטומטי מעצבן באייפון */
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        // יצירת רכיב אייקון מותאם כדי שיעבוד ב-React
+        // רכיב אייקון יציב למובייל
         const Icon = ({ name, className = "" }) => {
             React.useEffect(() => {
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
+                if (window.lucide) window.lucide.createIcons();
             }, [name]);
-            return <i data-lucide={name} className={className}></i>;
+            return <i data-lucide={name} className={`${className} inline-block`}></i>;
         };
 
         const LOT_SIZE_RANGES = [
@@ -121,117 +132,134 @@
           }, [lotSize, level, planType, aql, isLotSizeValid]);
 
           return (
-            <div className="min-h-screen bg-slate-100 p-2 md:p-4 text-right" dir="rtl">
-              <div className="max-w-6xl mx-auto bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+            <div className="min-h-screen pb-10">
+              {/* Header */}
+              <div className="bg-slate-900 text-white p-6 shadow-lg">
+                 <div className="max-w-6xl mx-auto flex items-center gap-3">
+                    <Icon name="clipboard-check" className="text-blue-400 w-6 h-6" />
+                    <h1 className="text-xl font-black">מחשבון דגימה</h1>
+                 </div>
+              </div>
+
+              <div className="max-w-6xl mx-auto p-4 md:p-6 grid lg:grid-cols-12 gap-6">
                 
-                {/* Header */}
-                <div className="bg-slate-900 text-white p-5 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                {/* Inputs Area */}
+                <div className="lg:col-span-4 space-y-5 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
                   <div>
-                    <h1 className="text-xl md:text-3xl font-black flex items-center gap-3">
-                      <Icon name="clipboard-check" className="text-blue-400 w-8 h-8" />
-                      <span>מחשבון דגימה מתקדם</span>
-                    </h1>
-                    <p className="text-slate-400 mt-1 italic text-xs md:text-sm">MIL-STD-105E Sampling Calculator</p>
+                    <label className="block text-xs font-black text-slate-500 mb-2 uppercase tracking-widest">גודל מנה (N)</label>
+                    <input 
+                      type="number" 
+                      inputMode="numeric"
+                      value={lotSize} 
+                      onChange={(e) => setLotSize(e.target.value)} 
+                      className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-blue-500 outline-none font-black text-2xl text-center" 
+                      placeholder="הזן מספר"
+                    />
                   </div>
-                </div>
 
-                <div className="grid lg:grid-cols-12 gap-0">
-                  {/* Sidebar Controls */}
-                  <div className="lg:col-span-4 p-4 md:p-6 bg-slate-50 border-l border-slate-200 space-y-6">
-                    <div>
-                      <label className="block text-xs font-black text-slate-500 mb-2 uppercase tracking-widest">גודל מנה (N)</label>
-                      <input type="number" value={lotSize} onChange={(e) => setLotSize(e.target.value === '' ? '' : parseInt(e.target.value))} className="w-full p-4 bg-white border-2 border-slate-200 rounded-2xl focus:border-blue-500 outline-none font-black text-2xl text-center transition-all" />
-                    </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button onClick={() => {setCategory('general'); setLevel('II')}} className={`py-3 rounded-xl font-bold text-sm border-2 transition-all ${category === 'general' ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white border-slate-100 text-slate-400'}`}>כללית</button>
+                    <button onClick={() => {setCategory('special'); setLevel('S-4')}} className={`py-3 rounded-xl font-bold text-sm border-2 transition-all ${category === 'special' ? 'bg-amber-50 border-amber-500 text-amber-700' : 'bg-white border-slate-100 text-slate-400'}`}>מיוחדת</button>
+                  </div>
 
-                    <div className={!isLotSizeValid ? 'opacity-30 pointer-events-none' : ''}>
-                      <label className="block text-xs font-black text-slate-500 mb-2 uppercase">סוג בחינה</label>
-                      <div className="flex bg-slate-200 p-1 rounded-xl">
-                        <button onClick={() => {setCategory('general'); setLevel('II')}} className={`flex-1 py-2 rounded-lg font-bold text-sm ${category === 'general' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500'}`}>כללית</button>
-                        <button onClick={() => {setCategory('special'); setLevel('S-4')}} className={`flex-1 py-2 rounded-lg font-bold text-sm ${category === 'special' ? 'bg-white text-amber-700 shadow-sm' : 'text-slate-500'}`}>מיוחדת</button>
-                      </div>
-                    </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {(category === 'general' ? ['I', 'II', 'III'] : ['S-1', 'S-2', 'S-3', 'S-4']).map(lvl => (
+                      <button key={lvl} onClick={() => setLevel(lvl)} className={`py-2 rounded-lg text-xs font-black border-2 transition-all ${level === lvl ? 'bg-slate-800 border-slate-800 text-white' : 'bg-white border-slate-100 text-slate-500'}`}>{lvl}</button>
+                    ))}
+                  </div>
 
-                    <div className={!isLotSizeValid ? 'opacity-30 pointer-events-none' : ''}>
-                      <label className="block text-xs font-black text-slate-500 mb-2 uppercase">רמת בחינה</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {(category === 'general' ? ['I', 'II', 'III'] : ['S-1', 'S-2', 'S-3', 'S-4']).map(lvl => (
-                          <button key={lvl} onClick={() => setLevel(lvl)} className={`py-2 rounded-lg text-xs font-black border-2 transition-all ${level === lvl ? 'bg-slate-800 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-500'}`}>{lvl}</button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className={`grid grid-cols-2 gap-3 ${!isLotSizeValid ? 'opacity-30 pointer-events-none' : ''}`}>
-                      <select value={planType} onChange={(e) => setPlanType(e.target.value)} className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl font-bold text-sm">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400">שיטה</span>
+                      <select value={planType} onChange={(e) => setPlanType(e.target.value)} className="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm">
                         <option value="single">בודדת</option>
                         <option value="double">כפולה</option>
                         <option value="multiple">מרובה</option>
                       </select>
-                      <select value={aql} onChange={(e) => setAql(parseFloat(e.target.value))} className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl font-bold text-sm">
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-slate-400">AQL (%)</span>
+                      <select value={aql} onChange={(e) => setAql(parseFloat(e.target.value))} className="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm">
                         {AQL_VALUES.map(v => <option key={v} value={v}>{v}%</option>)}
                       </select>
                     </div>
                   </div>
+                </div>
 
-                  {/* Results Panel */}
-                  <div className="lg:col-span-8 p-4 md:p-8">
-                    {!isLotSizeValid ? (
-                      <div className="h-full flex flex-col items-center justify-center text-center p-12 bg-slate-50 rounded-3xl border-4 border-dashed border-slate-100 text-slate-400">
-                        <Icon name="arrow-down" className="w-12 h-12 mb-4 animate-bounce" />
-                        <h3 className="text-xl font-black">הזן גודל מנה לחישוב</h3>
-                      </div>
-                    ) : (
-                      <div className="space-y-8 animate-in fade-in duration-500">
-                        <div className="p-8 rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row justify-between items-center bg-slate-900 text-white gap-8">
-                          <div className="text-center md:text-right">
-                            <span className="text-[10px] font-black opacity-50 block mb-2 uppercase tracking-widest">אות קוד</span>
-                            <div className="flex items-center gap-4">
-                              <span className="text-8xl font-black tracking-tighter">{result.originalCode}</span>
-                              {result.arrowPath && (
-                                <div className="flex items-center gap-3 bg-white/10 px-6 py-4 rounded-[2rem] border border-white/20">
-                                  <span className="text-3xl animate-pulse">{result.arrowPath}</span>
-                                  <span className="text-5xl font-black">{result.finalCode}</span>
-                                </div>
-                              )}
-                            </div>
+                {/* Results Area */}
+                <div className="lg:col-span-8">
+                  {!isLotSizeValid ? (
+                    <div className="h-40 flex flex-col items-center justify-center bg-white rounded-3xl border-2 border-dashed border-slate-200 text-slate-300">
+                      <Icon name="mouse-pointer-2" className="w-8 h-8 mb-2" />
+                      <p className="font-bold">המתנה לנתונים...</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {/* Code Hero */}
+                      <div className="bg-slate-900 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden">
+                        <div className="flex justify-between items-center relative z-10">
+                          <div>
+                             <span className="text-[10px] font-black opacity-50 block mb-1 uppercase tracking-widest">אות קוד דגימה</span>
+                             <div className="flex items-center gap-3">
+                                <span className="text-7xl font-black">{result.originalCode}</span>
+                                {result.arrowPath && (
+                                  <div className="bg-white/10 px-4 py-2 rounded-2xl border border-white/20 flex items-center gap-2">
+                                    <span className="text-xl animate-pulse text-blue-400">{result.arrowPath}</span>
+                                    <span className="text-4xl font-black">{result.finalCode}</span>
+                                  </div>
+                                )}
+                             </div>
                           </div>
-                          <div className="grid grid-cols-3 gap-8 border-r-2 border-white/10 pr-8">
-                            <div><span className="block text-[10px] opacity-50 uppercase">בחינה</span><span className="text-xl font-bold">{category === 'general' ? 'כללית' : 'מיוחדת'}</span></div>
-                            <div><span className="block text-[10px] opacity-50 uppercase">רמה</span><span className="text-xl font-bold">{level}</span></div>
-                            <div><span className="block text-[10px] opacity-50 uppercase">AQL</span><span className="text-xl font-bold">{aql}%</span></div>
+                          <div className="text-left hidden sm:block">
+                             <Icon name="shield-check" className="w-12 h-12 text-blue-500/30" />
                           </div>
                         </div>
+                      </div>
 
-                        <div className="bg-white border border-slate-200 rounded-[2rem] shadow-sm overflow-hidden">
-                          <div className="bg-slate-100 px-8 py-5 font-black text-slate-800 flex items-center gap-2 border-b">
-                            <Icon name="layers" className="w-5 h-5 text-blue-500" />
-                            תוכנית דגימה {planType}
-                          </div>
-                          <table className="w-full text-center">
+                      {/* Main Table Card */}
+                      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+                        <div className="bg-slate-50 px-6 py-4 border-b flex justify-between items-center font-black text-sm text-slate-700">
+                           <div className="flex items-center gap-2">
+                              <Icon name="layers" className="w-4 h-4 text-blue-500" />
+                              <span>תוכנית דגימה {planType === 'single' ? 'בודדת' : 'מורחבת'}</span>
+                           </div>
+                        </div>
+                        <div className="mobile-scroll">
+                          <table className="w-full text-center min-w-[400px]">
                             <thead>
-                              <tr className="text-slate-400 text-xs font-black uppercase border-b">
-                                <th className="p-6">שלב</th>
-                                <th className="p-6">מדגם (n)</th>
-                                <th className="p-6">מצטבר</th>
-                                <th className="p-6 bg-emerald-50 text-emerald-700">Ac</th>
-                                <th className="p-6 bg-rose-50 text-rose-700">Re</th>
+                              <tr className="text-slate-400 text-[10px] font-black uppercase border-b bg-slate-50/50">
+                                <th className="p-4">שלב</th>
+                                <th className="p-4">מדגם (n)</th>
+                                <th className="p-4 bg-emerald-50 text-emerald-700 font-bold">Ac</th>
+                                <th className="p-4 bg-rose-50 text-rose-700 font-bold">Re</th>
                               </tr>
                             </thead>
                             <tbody>
                               {result.steps.map((s, i) => (
-                                <tr key={i} className="border-b last:border-0 hover:bg-slate-50 transition-all">
-                                  <td className="p-6 text-slate-300 font-bold italic">{s.step}</td>
-                                  <td className="p-6 font-black text-slate-800 text-3xl">{s.size}</td>
-                                  <td className="p-6 text-slate-400 font-bold">{s.cum}</td>
-                                  <td className="p-6 bg-emerald-50 font-black text-emerald-600 text-4xl">{s.ac}</td>
-                                  <td className="p-6 bg-rose-50 font-black text-rose-600 text-4xl">{s.re}</td>
+                                <tr key={i} className="border-b last:border-0">
+                                  <td className="p-4 text-slate-300 font-bold italic">{s.step}</td>
+                                  <td className="p-4">
+                                     <div className="font-black text-2xl text-slate-800">{s.size}</div>
+                                     <div className="text-[9px] text-slate-400 font-bold">מצטבר: {s.cum}</div>
+                                  </td>
+                                  <td className="p-4 bg-emerald-50/30 font-black text-3xl text-emerald-600">{s.ac}</td>
+                                  <td className="p-4 bg-rose-50/30 font-black text-3xl text-rose-600">{s.re}</td>
                                 </tr>
                               ))}
                             </tbody>
                           </table>
                         </div>
                       </div>
-                    )}
-                  </div>
+
+                      {/* Info Footer */}
+                      <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex gap-3 items-start">
+                         <Icon name="info" className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                         <p className="text-xs text-blue-800 leading-relaxed font-medium">
+                           החישוב מתבצע לפי טבלאות <b>MIL-STD-105E</b> לבחינה רגילה. במידה ומופיע חץ, המערכת עוקבת אחריו אוטומטית לאות הקוד המתאימה.
+                         </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
