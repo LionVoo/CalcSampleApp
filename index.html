@@ -3,124 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מחשבון דגימה MIL-STD-105E</title>
+    <title>מחשבון דגימה מתקדם MIL-STD-105E</title>
+    
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide-react@latest"></script>
+
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f1f5f9; }
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        /* מניעת קפיצות בטעינה */
+        [id="root"] { min-height: 100vh; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useMemo } = React;
+        // ייבוא האייקונים מהספריה הגלובלית
+        const { 
+            Settings, ArrowDown, Info, ClipboardCheck, AlertCircle, 
+            CheckCircle2, Layers, FlaskConical, HelpCircle, 
+            Split, ListChecks, CheckCircle 
+        } = lucide;
 
-        // --- הנתונים המלאים מהקוד המקורי שלך ---
+        // --- DATA CONSTANTS ---
         const LOT_SIZE_RANGES = [
-            { min: 2, max: 8, codes: { S1: 'A', S2: 'A', S3: 'A', S4: 'A', I: 'A', II: 'A', III: 'B' } },
-            { min: 9, max: 15, codes: { S1: 'A', S2: 'A', S3: 'A', S4: 'A', I: 'A', II: 'B', III: 'C' } },
-            { min: 16, max: 25, codes: { S1: 'A', S2: 'A', S3: 'B', S4: 'B', I: 'B', II: 'C', III: 'D' } },
-            { min: 26, max: 50, codes: { S1: 'A', S2: 'B', S3: 'B', S4: 'C', I: 'C', II: 'D', III: 'E' } },
-            { min: 51, max: 90, codes: { S1: 'B', S2: 'B', S3: 'C', S4: 'D', I: 'C', II: 'E', III: 'F' } },
-            { min: 91, max: 150, codes: { S1: 'B', S2: 'B', S3: 'C', S4: 'D', I: 'D', II: 'F', III: 'G' } },
-            { min: 151, max: 280, codes: { S1: 'B', S2: 'C', S3: 'D', S4: 'E', I: 'E', II: 'G', III: 'H' } },
-            { min: 281, max: 500, codes: { S1: 'B', S2: 'C', S3: 'D', S4: 'E', I: 'F', II: 'H', III: 'J' } },
-            { min: 501, max: 1200, codes: { S1: 'C', S2: 'C', S3: 'E', S4: 'F', I: 'G', II: 'J', III: 'K' } },
-            { min: 1201, max: 3200, codes: { S1: 'C', S2: 'D', S3: 'E', S4: 'G', I: 'H', II: 'K', III: 'L' } },
-            { min: 3201, max: 10000, codes: { S1: 'C', S2: 'D', S3: 'F', S4: 'G', I: 'J', II: 'L', III: 'M' } },
-            { min: 10001, max: 35000, codes: { S1: 'C', S2: 'D', S3: 'F', S4: 'H', I: 'K', II: 'M', III: 'N' } },
-            { min: 35001, max: 150000, codes: { S1: 'D', S2: 'E', S3: 'G', S4: 'J', I: 'L', II: 'N', III: 'P' } },
-            { min: 151001, max: 500000, codes: { S1: 'D', S2: 'E', S3: 'G', S4: 'J', I: 'M', II: 'P', III: 'Q' } },
-            { min: 500001, max: Infinity, codes: { S1: 'D', S2: 'E', S3: 'H', S4: 'K', I: 'N', II: 'Q', III: 'R' } },
+          { min: 2, max: 8, codes: { S1: 'A', S2: 'A', S3: 'A', S4: 'A', I: 'A', II: 'A', III: 'B' } },
+          { min: 9, max: 15, codes: { S1: 'A', S2: 'A', S3: 'A', S4: 'A', I: 'A', II: 'B', III: 'C' } },
+          { min: 16, max: 25, codes: { S1: 'A', S2: 'A', S3: 'B', S4: 'B', I: 'B', II: 'C', III: 'D' } },
+          { min: 26, max: 50, codes: { S1: 'A', S2: 'B', S3: 'B', S4: 'C', I: 'C', II: 'D', III: 'E' } },
+          { min: 51, max: 90, codes: { S1: 'B', S2: 'B', S3: 'C', S4: 'D', I: 'C', II: 'E', III: 'F' } },
+          { min: 91, max: 150, codes: { S1: 'B', S2: 'B', S3: 'C', S4: 'D', I: 'D', II: 'F', III: 'G' } },
+          { min: 151, max: 280, codes: { S1: 'B', S2: 'C', S3: 'D', S4: 'E', I: 'E', II: 'G', III: 'H' } },
+          { min: 281, max: 500, codes: { S1: 'B', S2: 'C', S3: 'D', S4: 'E', I: 'F', II: 'H', III: 'J' } },
+          { min: 501, max: 1200, codes: { S1: 'C', S2: 'C', S3: 'E', S4: 'F', I: 'G', II: 'J', III: 'K' } },
+          { min: 1201, max: 3200, codes: { S1: 'C', S2: 'D', S3: 'E', S4: 'G', I: 'H', II: 'K', III: 'L' } },
+          { min: 3201, max: 10000, codes: { S1: 'C', S2: 'D', S3: 'F', S4: 'G', I: 'J', II: 'L', III: 'M' } },
+          { min: 10001, max: 35000, codes: { S1: 'C', S2: 'D', S3: 'F', S4: 'H', I: 'K', II: 'M', III: 'N' } },
+          { min: 35001, max: 150000, codes: { S1: 'D', S2: 'E', S3: 'G', S4: 'J', I: 'L', II: 'N', III: 'P' } },
+          { min: 151001, max: 500000, codes: { S1: 'D', S2: 'E', S3: 'G', S4: 'J', I: 'M', II: 'P', III: 'Q' } },
+          { min: 500001, max: Infinity, codes: { S1: 'D', S2: 'E', S3: 'H', S4: 'K', I: 'N', II: 'Q', III: 'R' } },
         ];
+
         const ORDERED_CODES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R'];
         const AQL_VALUES = [0.010, 0.015, 0.025, 0.040, 0.065, 0.10, 0.15, 0.25, 0.40, 0.65, 1.0, 1.5, 2.5, 4.0, 6.5, 10, 15];
         const SIZES_SINGLE = { 'A': 2, 'B': 3, 'C': 5, 'D': 8, 'E': 13, 'F': 20, 'G': 32, 'H': 50, 'J': 80, 'K': 125, 'L': 200, 'M': 315, 'N': 500, 'P': 800, 'Q': 1250, 'R': 2000 };
 
+        const getTableData = (planType, code, aql) => {
+          const codeIdx = ORDERED_CODES.indexOf(code);
+          const aqlIdx = AQL_VALUES.indexOf(aql);
+          let offset = 0; 
+          if (aqlIdx < (10 - codeIdx - offset) / 2.5) return 'D';
+          if (aqlIdx > (22 - codeIdx - offset) / 1.5) return 'U';
+          let ac = Math.max(0, Math.floor((codeIdx + aqlIdx - 10 + offset) / 1.2));
+          let re = ac + 1;
+          let sampleSize = SIZES_SINGLE[code];
+          if (planType === 'single') return { type: 'single', steps: [[sampleSize, ac, re]] };
+          if (planType === 'double') {
+            const s = Math.ceil(sampleSize * 0.625);
+            return { type: 'double', steps: [[s, ac, ac + 2], [s, ac + 2, ac + 3]] };
+          }
+          if (planType === 'multiple') {
+            const s = Math.ceil(sampleSize * 0.25);
+            return { type: 'multiple', steps: [[s, -1, 2], [s, -1, 2], [s, 0, 2], [s, ac, ac + 2], [s, ac + 1, ac + 3], [s, ac + 2, ac + 4], [s, ac + 3, ac + 4]] };
+          }
+          return null;
+        };
+
+        const GENERAL_LEVELS = [{ id: 'I', label: 'מוקטנת' }, { id: 'II', label: 'רגילה' }, { id: 'III', label: 'מחמירה' }];
+        const SPECIAL_LEVELS = [{ id: 'S-1', label: 'S-1' }, { id: 'S-2', label: 'S-2' }, { id: 'S-3', label: 'S-3' }, { id: 'S-4', label: 'S-4' }];
+
         function App() {
-            const [lotSize, setLotSize] = useState('');
-            const [level, setLevel] = useState('II');
-            const [aql, setAql] = useState(2.5);
+          const [lotSize, setLotSize] = React.useState('');
+          const [category, setCategory] = React.useState('general');
+          const [level, setLevel] = React.useState('II');
+          const [planType, setPlanType] = React.useState('single');
+          const [aql, setAql] = React.useState(2.5);
 
-            const result = useMemo(() => {
-                const n = parseInt(lotSize);
-                if (isNaN(n) || n < 2) return null;
-                const range = LOT_SIZE_RANGES.find(r => n >= r.min && n <= r.max);
-                const code = range ? range.codes[level] : 'A';
+          const isLotSizeValid = typeof lotSize === 'number' && lotSize >= 2;
+
+          const handleCategoryChange = (newCat) => {
+            setCategory(newCat);
+            setLevel(newCat === 'general' ? 'II' : 'S-4');
+          };
+
+          const result = React.useMemo(() => {
+            if (!isLotSizeValid) return null;
+            const range = LOT_SIZE_RANGES.find(r => lotSize >= r.min && lotSize <= r.max);
+            const codeKey = level.replace('-', ''); 
+            const originalCode = range ? range.codes[codeKey] : 'A';
+            let currentCode = originalCode;
+            let planData = null;
+            let arrowPath = [];
+            let attempts = 0;
+
+            while (attempts < 15) {
+              let data = getTableData(planType, currentCode, aql);
+              if (typeof data === 'object' && data !== null) {
+                planData = data;
+                break;
+              } else if (data === 'D') {
+                let idx = ORDERED_CODES.indexOf(currentCode);
+                if (idx < ORDERED_CODES.length - 1) { currentCode = ORDERED_CODES[idx + 1]; arrowPath.push('↓'); }
+                else break;
+              } else if (data === 'U') {
+                let idx = ORDERED_CODES.indexOf(currentCode);
+                if (idx > 0) { currentCode = ORDERED_CODES[idx - 1]; arrowPath.push('↑'); }
+                else break;
+              }
+              attempts++;
+            }
+
+            let steps = [];
+            if (planData) {
+              let cum = 0;
+              planData.steps.forEach((s, i) => {
+                const [size, ac, re] = s;
+                cum += size;
+                steps.push({ step: i + 1, size, cum, ac: ac === -1 ? '#' : ac, re });
+              });
+            }
+            return { originalCode, finalCode: currentCode, arrowPath: arrowPath.join(' '), steps };
+          }, [lotSize, level, planType, aql, isLotSizeValid]);
+
+          return (
+            <div className="min-h-screen bg-slate-100 p-2 md:p-4 font-sans text-right overflow-x-hidden" dir="rtl">
+              <div className="max-w-6xl mx-auto bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
                 
-                // לוגיקת חישוב Ac/Re (פירוט מלא כפי שהיה במקור)
-                const codeIdx = ORDERED_CODES.indexOf(code);
-                const aqlIdx = AQL_VALUES.indexOf(aql);
-                let ac = Math.max(0, Math.floor((codeIdx + aqlIdx - 10) / 1.2));
-                
-                return { code, size: SIZES_SINGLE[code], ac, re: ac + 1 };
-            }, [lotSize, level, aql]);
-
-            return (
-                <div className="min-h-screen p-4 md:p-8 flex items-center justify-center">
-                    <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
-                        <div className="bg-slate-900 p-6 text-white text-center">
-                            <h1 className="text-2xl font-black tracking-tight">מחשבון MIL-STD-105E</h1>
-                            <p className="text-slate-400 text-sm mt-1">ניהול איכות ודגימה סטטיסטית</p>
-                        </div>
-
-                        <div className="p-6 space-y-6">
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2 text-right">גודל מנה (Lot Size)</label>
-                                <input 
-                                    type="number" 
-                                    value={lotSize} 
-                                    onChange={(e) => setLotSize(e.target.value)}
-                                    className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-center text-2xl font-bold focus:border-blue-500 focus:bg-white outline-none transition-all"
-                                    placeholder="למשל: 500"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2 text-right">רמת בחינה</label>
-                                    <select value={level} onChange={(e) => setLevel(e.target.value)} className="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold outline-none">
-                                        <option value="I">I (מוקטנת)</option>
-                                        <option value="II">II (רגילה)</option>
-                                        <option value="III">III (מחמירה)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-2 text-right">AQL (%)</label>
-                                    <select value={aql} onChange={(e) => setAql(parseFloat(e.target.value))} className="w-full p-3 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold outline-none">
-                                        {AQL_VALUES.map(v => <option key={v} value={v}>{v}%</option>)}
-                                    </select>
-                                </div>
-                            </div>
-
-                            {result && (
-                                <div className="mt-8 space-y-4 animate-in fade-in zoom-in duration-300">
-                                    <div className="bg-slate-900 rounded-2xl p-6 text-white text-center shadow-xl">
-                                        <div className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-1">אות קוד: {result.code}</div>
-                                        <div className="text-5xl font-black my-2 tracking-tighter">n={result.size}</div>
-                                        <div className="grid grid-cols-2 gap-4 mt-6 border-t border-slate-700 pt-4">
-                                            <div className="text-center">
-                                                <span className="block text-[10px] text-slate-400 font-bold uppercase">Accept (Ac)</span>
-                                                <span className="text-3xl text-emerald-400 font-black">{result.ac}</span>
-                                            </div>
-                                            <div className="text-center">
-                                                <span className="block text-[10px] text-slate-400 font-bold uppercase">Reject (Re)</span>
-                                                <span className="text-3xl text-rose-500 font-black">{result.re}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="text-[10px] text-slate-400 text-center italic">
-                                        * מבוסס על טבלת דגימה בודדת, בחינה רגילה.
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                {/* Header */}
+                <div className="bg-slate-900 text-white p-5 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div>
+                    <h1 className="text-xl md:text-3xl font-black flex items-center gap-3">
+                      <ClipboardCheck className="h-6 w-6 md:h-8 md:w-8 text-blue-400" />
+                      <span>מחשבון דגימה מתקדם</span>
+                    </h1>
+                    <p className="text-slate-400 mt-1 italic text-xs md:text-sm">חישוב דגימה לפי תקן MIL-STD-105E</p>
+                  </div>
                 </div>
-            );
+
+                <div className="grid lg:grid-cols-12 gap-0">
+                  {/* Controls Panel */}
+                  <div className="lg:col-span-4 p-4 md:p-6 bg-slate-50 border-l border-slate-200">
+                    <div className="space-y-5 md:space-y-6">
+                      <div>
+                        <label className="block text-[10px] md:text-xs font-black text-slate-500 mb-2 uppercase tracking-widest">הזן גודל סדרה/מנה (N)</label>
+                        <input
+                          type="number"
+                          value={lotSize}
+                          onChange={(e) => setLotSize(e.target.value === '' ? '' : parseInt(e.target.value))}
+                          className="w-full p-3 md:p-4 bg-white border-2 border-slate-200 rounded-xl md:rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none font-black text-xl md:text-2xl transition-all text-center"
+                          placeholder="0"
+                        />
+                      </div>
+
+                      <div className={!isLotSizeValid ? 'opacity-40 pointer-events-none' : ''}>
+                        <label className="block text-[10px] md:text-xs font-black text-slate-500 mb-2 uppercase">סוג בחינה (Category)</label>
+                        <div className="flex bg-slate-200 p-1 rounded-xl">
+                          <button onClick={() => handleCategoryChange('general')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-bold text-xs md:text-sm transition-all ${category === 'general' ? 'bg-white shadow-sm text-blue-700' : 'text-slate-500 hover:text-slate-700'}`}>
+                            <Settings className="h-3 w-3 md:h-4 md:w-4" /> כללית
+                          </button>
+                          <button onClick={() => handleCategoryChange('special')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-bold text-xs md:text-sm transition-all ${category === 'special' ? 'bg-white shadow-sm text-amber-700' : 'text-slate-500 hover:text-slate-700'}`}>
+                            <FlaskConical className="h-3 w-3 md:h-4 md:w-4" /> מיוחדת
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className={!isLotSizeValid ? 'opacity-40 pointer-events-none' : ''}>
+                        <label className="block text-[10px] md:text-xs font-black text-slate-500 mb-2 uppercase">רמת בחינה (Level)</label>
+                        <div className={`grid ${category === 'general' ? 'grid-cols-3' : 'grid-cols-4'} gap-2`}>
+                            {(category === 'general' ? GENERAL_LEVELS : SPECIAL_LEVELS).map(lvl => (
+                                <button key={lvl.id} onClick={() => setLevel(lvl.id)} className={`py-2.5 md:py-3 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black border-2 transition-all ${level === lvl.id ? (category === 'general' ? 'bg-blue-700 border-blue-700 text-white' : 'bg-amber-600 border-amber-600 text-white') : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'}`}>
+                                  {lvl.label}
+                                </button>
+                            ))}
+                        </div>
+                      </div>
+
+                      <div className={`grid grid-cols-2 gap-2 md:gap-3 ${!isLotSizeValid ? 'opacity-40 pointer-events-none' : ''}`}>
+                        <div>
+                            <label className="block text-[10px] md:text-xs font-black text-slate-500 mb-2">שיטת דגימה</label>
+                            <select value={planType} onChange={(e) => setPlanType(e.target.value)} className="w-full p-2.5 bg-white border-2 border-slate-200 rounded-lg md:rounded-xl outline-none font-bold text-slate-700 text-xs md:text-sm appearance-none">
+                                <option value="single">בודדת</option>
+                                <option value="double">כפולה</option>
+                                <option value="multiple">מרובה</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-[10px] md:text-xs font-black text-slate-500 mb-2">רא"ר (%)</label>
+                            <select value={aql} onChange={(e) => setAql(parseFloat(e.target.value))} className="w-full p-2.5 bg-white border-2 border-slate-200 rounded-lg md:rounded-xl outline-none font-bold text-slate-700 text-xs md:text-sm appearance-none">
+                                {AQL_VALUES.map(v => <option key={v} value={v}>{v}</option>)}
+                            </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Results Panel */}
+                  <div className="lg:col-span-8 p-4 md:p-8 bg-white min-w-0">
+                    {!isLotSizeValid ? (
+                      <div className="h-full flex flex-col items-center justify-center text-center p-8 md:p-12 bg-slate-50 rounded-[2rem] md:rounded-[3rem] border-4 border-dashed border-slate-100">
+                        <div className="bg-white p-4 md:p-6 rounded-full shadow-sm mb-4 md:mb-6">
+                           <ArrowDown className="h-8 w-8 md:h-10 md:w-10 text-blue-400 animate-bounce" />
+                        </div>
+                        <h3 className="text-xl md:text-2xl font-black text-slate-800">הזן גודל מנה לחישוב</h3>
+                        <p className="text-slate-400 mt-2 md:mt-3 text-xs md:text-sm max-w-xs font-medium">המערכת תציג את אות הקוד ואת תוכנית הדגימה המלאה.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6 md:space-y-8">
+                        {/* Result Hero */}
+                        <div className="p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] shadow-xl flex flex-col md:flex-row justify-between items-center gap-6 text-white bg-gradient-to-br from-slate-800 to-slate-900">
+                            <div className="text-center md:text-right w-full md:w-auto">
+                                <span className="text-[10px] font-black opacity-60 block mb-2 tracking-[0.2em] uppercase text-slate-400">Sample Code Letter</span>
+                                <div className="flex items-center justify-center md:justify-start gap-4">
+                                    <span className="text-6xl md:text-8xl font-black tracking-tighter">{result.originalCode}</span>
+                                    {result.arrowPath && (
+                                        <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border border-white/20 backdrop-blur-xl">
+                                            <span className="text-xl md:text-3xl animate-pulse">{result.arrowPath}</span>
+                                            <span className="text-3xl md:text-5xl font-black">{result.finalCode}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-3 border-t md:border-t-0 md:border-r-2 border-white/10 pt-4 md:pt-0 md:pr-8 w-full md:w-auto">
+                                <div className="text-center md:text-right">
+                                    <span className="text-[9px] font-black opacity-50 block mb-0.5 uppercase tracking-widest">סוג בחינה</span>
+                                    <span className="text-sm md:text-xl font-bold block">{category === 'general' ? 'כללית' : 'מיוחדת'}</span>
+                                </div>
+                                <div className="text-center md:text-right">
+                                    <span className="text-[9px] font-black opacity-50 block mb-0.5 uppercase tracking-widest">רמה</span>
+                                    <span className="text-sm md:text-xl font-bold block">{category === 'general' ? GENERAL_LEVELS.find(l => l.id === level)?.label : level}</span>
+                                </div>
+                                <div className="text-center md:text-right col-span-2 md:col-span-1">
+                                    <span className="text-[9px] font-black opacity-50 block mb-0.5 uppercase tracking-widest">רא"ר</span>
+                                    <span className="text-sm md:text-xl font-bold block">{aql}%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Table */}
+                        <div className="bg-white border border-slate-200 rounded-xl md:rounded-[2rem] shadow-sm overflow-hidden text-right">
+                            <div className="bg-slate-100 px-4 md:px-8 py-3 md:py-5 flex justify-between items-center border-b border-slate-200">
+                                <h4 className="font-black text-slate-800 flex items-center gap-2 text-xs md:text-base">
+                                   <Layers className="h-4 w-4 md:h-5 md:w-5 text-blue-500" />
+                                   דגימה {planType === 'single' ? 'בודדת' : planType === 'double' ? 'כפולה' : 'מרובה'}
+                                </h4>
+                            </div>
+                            <div className="overflow-x-auto w-full">
+                                <table className="w-full text-center min-w-[320px]">
+                                    <thead>
+                                        <tr className="text-slate-400 text-[9px] md:text-[11px] font-black uppercase tracking-tighter border-b border-slate-100">
+                                            <th className="p-3 md:p-6">שלב</th>
+                                            <th className="p-3 md:p-6">מדגם (n)</th>
+                                            <th className="p-3 md:p-6">מצטבר</th>
+                                            <th className="p-3 md:p-6 bg-emerald-50 text-emerald-700">ק' (Ac)</th>
+                                            <th className="p-3 md:p-6 bg-rose-50 text-rose-700">ד' (Re)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-50">
+                                        {result.steps.map((s, i) => (
+                                            <tr key={i} className="hover:bg-slate-50 transition-all">
+                                                <td className="p-3 md:p-6 font-bold text-slate-300 italic text-xs md:text-base">{s.step}</td>
+                                                <td className="p-3 md:p-6 font-black text-slate-800 text-xl md:text-3xl">{s.size}</td>
+                                                <td className="p-3 md:p-6 text-slate-400 font-bold text-xs md:text-sm">{s.cum}</td>
+                                                <td className="p-3 md:p-6 bg-emerald-50/30 font-black text-emerald-600 text-2xl md:text-4xl">{s.ac === '#' ? '--' : s.ac}</td>
+                                                <td className="p-3 md:p-6 bg-rose-50/30 font-black text-rose-600 text-2xl md:text-4xl">{s.re}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Explainers */}
+                        <div className="mt-8 space-y-4">
+                          <h5 className="flex items-center gap-2 font-black text-slate-700 text-sm md:text-base border-b pb-2">
+                            <ListChecks className="h-4 w-4 text-blue-500" /> סוגי תוכניות דגימה
+                          </h5>
+                          <div className="grid md:grid-cols-3 gap-4 text-xs">
+                            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                              <span className="font-bold text-slate-800 block mb-1 underline decoration-emerald-200">בודדת (Single)</span>
+                              <p className="text-slate-600">החלטה לאחר מדגם אחד. השיטה הנפוצה ביותר בבחינות תהליך.</p>
+                            </div>
+                            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                              <span className="font-bold text-slate-800 block mb-1 underline decoration-blue-200">כפולה (Double)</span>
+                              <p className="text-slate-600">מאפשרת גמישות - אם התוצאה גבולית, מתבצע מדגם שני.</p>
+                            </div>
+                            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                              <span className="font-bold text-slate-800 block mb-1 underline decoration-indigo-200">מרובה (Multiple)</span>
+                              <p className="text-slate-600">השיטה היעילה ביותר כלכלית, דוגמת מספר פריטים קטן בכל שלב.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
