@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחשבון דגימה MIL-STD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body className="bg-slate-50">
+    <div id="app" class="max-w-md mx-auto p-4 mt-10 bg-white rounded-2xl shadow-xl border border-slate-200">
+        <h2 class="text-2xl font-black text-center text-slate-800 mb-6 border-b pb-4">מחשבון דגימה</h2>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-bold text-slate-600 mb-1">גודל מנה (N)</label>
+                <input type="number" id="lotSize" oninput="calculate()" class="w-full p-4 border-2 border-slate-100 rounded-xl text-center text-2xl font-bold focus:border-blue-500 outline-none transition-all" placeholder="הכנס מספר...">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-600 mb-1">רמת בחינה</label>
+                <select id="level" onchange="calculate()" class="w-full p-3 border-2 border-slate-100 rounded-xl bg-white font-bold">
+                    <option value="I">I (מוקטנת)</option>
+                    <option value="II" selected>II (רגילה)</option>
+                    <option value="III">III (מחמירה)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-600 mb-1">AQL (%)</label>
+                <select id="aql" onchange="calculate()" class="w-full p-3 border-2 border-slate-100 rounded-xl bg-white font-bold">
+                    <option value="0.65">0.65%</option>
+                    <option value="1.0">1.0%</option>
+                    <option value="1.5">1.5%</option>
+                    <option value="2.5" selected>2.5%</option>
+                    <option value="4.0">4.0%</option>
+                </select>
+            </div>
+
+            <div id="results" class="hidden mt-8 bg-slate-900 text-white p-6 rounded-2xl text-center shadow-inner">
+                <div class="text-blue-400 text-sm font-bold uppercase tracking-widest mb-1">אות קוד: <span id="resCode" class="text-white text-xl"></span></div>
+                <div class="text-4xl font-black my-3">מדגם: <span id="resSize"></span></div>
+                <div class="grid grid-cols-2 gap-4 border-t border-slate-700 pt-4 mt-2">
+                    <div class="bg-emerald-500/10 p-2 rounded-lg">
+                        <span class="block text-xs text-emerald-400 font-bold">Ac (ק')</span>
+                        <span id="resAc" class="text-2xl text-emerald-400 font-black"></span>
+                    </div>
+                    <div class="bg-rose-500/10 p-2 rounded-lg">
+                        <span class="block text-xs text-rose-400 font-bold">Re (ד')</span>
+                        <span id="resRe" class="text-2xl text-rose-400 font-black"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const RANGES = [
+            {min:2, max:8, codes:{I:'A', II:'A', III:'B'}},
+            {min:9, max:15, codes:{I:'A', II:'B', III:'C'}},
+            {min:16, max:25, codes:{I:'B', II:'C', III:'D'}},
+            {min:26, max:50, codes:{I:'C', II:'D', III:'E'}},
+            {min:51, max:90, codes:{I:'C', II:'E', III:'F'}},
+            {min:91, max:150, codes:{I:'D', II:'F', III:'G'}},
+            {min:151, max:280, codes:{I:'E', II:'G', III:'H'}},
+            {min:281, max:500, codes:{I:'F', II:'H', III:'J'}},
+            {min:501, max:1200, codes:{I:'G', II:'J', III:'K'}},
+            {min:1201, max:3200, codes:{I:'H', II:'K', III:'L'}},
+            {min:3201, max:10000, codes:{I:'J', II:'L', III:'M'}},
+            {min:10001, max:35000, codes:{I:'K', II:'M', III:'N'}},
+            {min:35001, max:150000, codes:{I:'L', II:'N', III:'P'}},
+            {min:151001, max:500000, codes:{I:'M', II:'P', III:'Q'}},
+            {min:500001, max:Infinity, codes:{I:'N', II:'Q', III:'R'}}
+        ];
+        const SIZES = {'A':2,'B':3,'C':5,'D':8,'E':13,'F':20,'G':32,'H':50,'J':80,'K':125,'L':200,'M':315,'N':500,'P':800,'Q':1250,'R':2000};
+        const CODES_LIST = ['A','B','C','D','E','F','G','H','J','K','L','M','N','P','Q','R'];
+
+        function calculate() {
+            const n = parseInt(document.getElementById('lotSize').value);
+            const level = document.getElementById('level').value;
+            const aql = parseFloat(document.getElementById('aql').value);
+            const resDiv = document.getElementById('results');
+
+            if (n >= 2) {
+                const range = RANGES.find(r => n >= r.min && n <= r.max);
+                const code = range ? range.codes[level] : 'A';
+                const size = SIZES[code];
+                
+                // חישוב מקורב לצרכי הדגמה
+                const ac = Math.max(0, Math.floor((CODES_LIST.indexOf(code) + (aql * 2) - 8) / 1.5));
+                
+                document.getElementById('resCode').innerText = code;
+                document.getElementById('resSize').innerText = size;
+                document.getElementById('resAc').innerText = ac;
+                document.getElementById('resRe').innerText = ac + 1;
+                resDiv.classList.remove('hidden');
+            } else {
+                resDiv.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
+
+
