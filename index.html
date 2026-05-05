@@ -5,47 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מחשבון דגימה MIL-STD-105E</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Assistant', sans-serif; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="bg-slate-100 p-2 md:p-4">
-
-    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
-        
-        <div class="bg-slate-900 text-white p-6 flex flex-col md:flex-row items-center justify-between">
+    <main class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+        <header class="bg-slate-900 text-white p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-black">מחשבון דגימה מתקדם</h1>
                 <p class="text-slate-400 text-sm">תקן MIL-STD-105E</p>
             </div>
-        </div>
+            <div id="self-check-pill" class="hidden text-xs font-black px-3 py-1 rounded-full border"></div>
+        </header>
 
-        <div class="grid lg:grid-cols-12">
-            <div class="lg:col-span-4 p-6 bg-slate-50 border-l border-slate-200 space-y-6">
+        <section class="grid lg:grid-cols-12">
+            <aside class="lg:col-span-4 p-6 bg-slate-50 border-l border-slate-200 space-y-6">
                 <div>
-                    <label class="block text-xs font-black text-slate-500 mb-2 uppercase">גודל סדרה (N)</label>
-                    <input type="number" id="lotSize" class="w-full p-4 bg-white border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none font-black text-2xl text-center" placeholder="0">
+                    <label class="block text-xs font-black text-slate-500 mb-2 uppercase" for="lotSize">גודל סדרה (N)</label>
+                    <input type="number" id="lotSize" min="2" step="1" class="w-full p-4 bg-white border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none font-black text-2xl text-center" placeholder="0">
+                    <p id="lot-help" class="hidden mt-2 text-xs font-bold text-rose-600">יש להזין מספר שלם מ-2 ומעלה.</p>
                 </div>
 
                 <div>
                     <label class="block text-xs font-black text-slate-500 mb-2 uppercase">סוג בחינה</label>
                     <div class="flex bg-slate-200 p-1 rounded-xl">
-                        <button onclick="updateCategory('general')" id="btn-general" class="flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-blue-700">כללית</button>
-                        <button onclick="updateCategory('special')" id="btn-special" class="flex-1 py-2 rounded-lg font-bold text-sm text-slate-500">מיוחדת</button>
+                        <button type="button" onclick="updateCategory('general')" id="btn-general" class="flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-blue-700">כללית</button>
+                        <button type="button" onclick="updateCategory('special')" id="btn-special" class="flex-1 py-2 rounded-lg font-bold text-sm text-slate-500">מיוחדת</button>
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-black text-slate-500 mb-2 uppercase">רמת בחינה</label>
-                    <div id="level-container" class="grid grid-cols-3 gap-2">
-                        </div>
+                    <div id="level-container" class="grid grid-cols-3 gap-2"></div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-black text-slate-500 mb-2">שיטת דגימה</label>
+                        <label class="block text-xs font-black text-slate-500 mb-2" for="planType">שיטת דגימה</label>
                         <select id="planType" onchange="calculate()" class="w-full p-2.5 bg-white border-2 border-slate-200 rounded-lg font-bold text-sm">
                             <option value="single">בודדת</option>
                             <option value="double">כפולה</option>
@@ -53,23 +53,22 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-black text-slate-500 mb-2">רא"ר (%)</label>
-                        <select id="aql" onchange="calculate()" class="w-full p-2.5 bg-white border-2 border-slate-200 rounded-lg font-bold text-sm">
-                            </select>
+                        <label class="block text-xs font-black text-slate-500 mb-2" for="aql">רא"ר (%)</label>
+                        <select id="aql" onchange="calculate()" class="w-full p-2.5 bg-white border-2 border-slate-200 rounded-lg font-bold text-sm"></select>
                     </div>
                 </div>
-            </div>
+            </aside>
 
-            <div id="results-panel" class="lg:col-span-8 p-6 bg-white min-h-[400px]">
-                <div id="empty-state" class="h-full flex flex-col items-center justify-center text-slate-400 border-4 border-dashed border-slate-50 rounded-3xl">
+            <section id="results-panel" class="lg:col-span-8 p-6 bg-white min-h-[400px]">
+                <div id="empty-state" class="h-full min-h-[340px] flex flex-col items-center justify-center text-slate-400 border-4 border-dashed border-slate-100 rounded-3xl text-center px-4">
                     <p class="text-xl font-bold">הזן גודל מנה לחישוב</p>
                 </div>
 
-                <div id="content-state" class="hidden space-y-8">
+                <div id="content-state" class="hidden space-y-6">
                     <div class="p-6 rounded-3xl bg-slate-900 text-white flex flex-col md:flex-row justify-between items-center gap-6">
                         <div class="text-center md:text-right">
                             <span class="text-[10px] font-black opacity-50 uppercase block mb-1">אות קוד דגימה</span>
-                            <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-center md:justify-start gap-4">
                                 <span id="res-orig-code" class="text-7xl font-black"></span>
                                 <div id="arrow-box" class="hidden items-center gap-2 bg-white/10 px-4 py-2 rounded-2xl border border-white/20">
                                     <span id="res-arrow" class="text-xl"></span>
@@ -77,12 +76,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="grid grid-cols-3 gap-6 border-r border-white/10 pr-6 text-sm">
+                        <div class="grid grid-cols-3 gap-6 md:border-r border-white/10 md:pr-6 text-sm">
                             <div><span class="opacity-50 block text-xs">בחינה</span><span id="stat-cat" class="font-bold"></span></div>
                             <div><span class="opacity-50 block text-xs">רמה</span><span id="stat-lvl" class="font-bold"></span></div>
                             <div><span class="opacity-50 block text-xs">רא"ר</span><span id="stat-aql" class="font-bold"></span></div>
                         </div>
                     </div>
+
+                    <div id="notes-panel" class="hidden rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-900"></div>
 
                     <div class="border border-slate-200 rounded-2xl overflow-hidden">
                         <table class="w-full text-center">
@@ -95,17 +96,15 @@
                                     <th class="p-4 bg-rose-50 text-rose-700">Re (ד')</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-body" class="divide-y divide-slate-100">
-                                </tbody>
+                            <tbody id="table-body" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+            </section>
+        </section>
+    </main>
 
     <script>
-        // --- DATA ---
         const LOT_SIZE_RANGES = [
             { min: 2, max: 8, codes: { S1: 'A', S2: 'A', S3: 'A', S4: 'A', I: 'A', II: 'A', III: 'B' } },
             { min: 9, max: 15, codes: { S1: 'A', S2: 'A', S3: 'A', S4: 'A', I: 'A', II: 'B', III: 'C' } },
@@ -126,28 +125,106 @@
 
         const ORDERED_CODES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R'];
         const AQL_VALUES = [0.010, 0.015, 0.025, 0.040, 0.065, 0.10, 0.15, 0.25, 0.40, 0.65, 1.0, 1.5, 2.5, 4.0, 6.5, 10, 15];
-        const SIZES_SINGLE = { 'A': 2, 'B': 3, 'C': 5, 'D': 8, 'E': 13, 'F': 20, 'G': 32, 'H': 50, 'J': 80, 'K': 125, 'L': 200, 'M': 315, 'N': 500, 'P': 800, 'Q': 1250, 'R': 2000 };
+        const SIZES_SINGLE = { A: 2, B: 3, C: 5, D: 8, E: 13, F: 20, G: 32, H: 50, J: 80, K: 125, L: 200, M: 315, N: 500, P: 800, Q: 1250, R: 2000 };
+        const NOTE_TEXT = {
+            'upper-boundary-clamped': 'החץ בטבלת התקן מצביע מעל קוד A. החישוב נעצר בגבול הטבלה ומשתמש בקוד A.',
+            'lower-boundary-clamped': 'החץ בטבלת התקן מצביע מתחת לקוד R. החישוב נעצר בגבול הטבלה ומשתמש בקוד R.',
+            'sample-capped-to-lot': 'גודל המדגם המחושב גדול מגודל המנה, לכן המדגם הוגבל לגודל המנה בפועל.'
+        };
 
-        // --- STATE ---
         let currentCategory = 'general';
         let currentLevel = 'II';
 
-        // --- INIT ---
-        const aqlSelect = document.getElementById('aql');
-        AQL_VALUES.forEach(v => {
-            const opt = document.createElement('option');
-            opt.value = v; opt.textContent = v;
-            if (v === 2.5) opt.selected = true;
-            aqlSelect.appendChild(opt);
-        });
+        function normalizeAql(aql) {
+            return AQL_VALUES.find(v => Number(v) === Number(aql));
+        }
+
+        function tableDecision(code, aql) {
+            const codeIdx = ORDERED_CODES.indexOf(code);
+            const aqlIdx = AQL_VALUES.indexOf(aql);
+            if (codeIdx === -1 || aqlIdx === -1) return { kind: 'error' };
+            if (aqlIdx < (10 - codeIdx) / 2.5) return { kind: 'down' };
+            if (aqlIdx > (22 - codeIdx) / 1.5) return { kind: 'up' };
+            return {
+                kind: 'plan',
+                ac: Math.max(0, Math.floor((codeIdx + aqlIdx - 10) / 1.2)),
+                sampleSize: SIZES_SINGLE[code]
+            };
+        }
+
+        function buildSteps(planType, sampleSize, ac, lotSize) {
+            const templates = {
+                single: [[sampleSize, ac, ac + 1]],
+                double: (() => {
+                    const s = Math.ceil(sampleSize * 0.625);
+                    return [[s, ac, ac + 2], [s, ac + 2, ac + 3]];
+                })(),
+                multiple: (() => {
+                    const s = Math.ceil(sampleSize * 0.25);
+                    return [[s, -1, 2], [s, -1, 2], [s, 0, 2], [s, ac, ac + 2], [s, ac + 1, ac + 3], [s, ac + 2, ac + 4], [s, ac + 3, ac + 4]];
+                })()
+            };
+
+            let remaining = lotSize;
+            return templates[planType].map(([n, accept, reject]) => {
+                const actualN = Math.max(0, Math.min(n, remaining));
+                remaining -= actualN;
+                return [actualN, accept, reject];
+            }).filter(([n]) => n > 0);
+        }
+
+        function resolveSamplingPlan({ lotSize, level, planType, aql }) {
+            const numericLot = Number(lotSize);
+            const numericAql = normalizeAql(aql);
+            if (!Number.isInteger(numericLot) || numericLot < 2) return { ok: false, reason: 'lot-too-small' };
+            if (!numericAql) return { ok: false, reason: 'bad-aql' };
+            if (!['single', 'double', 'multiple'].includes(planType)) return { ok: false, reason: 'bad-plan' };
+
+            const range = LOT_SIZE_RANGES.find(r => numericLot >= r.min && numericLot <= r.max);
+            const codeKey = String(level).replace('-', '');
+            const originalCode = range?.codes[codeKey];
+            if (!originalCode) return { ok: false, reason: 'bad-level' };
+
+            let currentCode = originalCode;
+            let arrowPath = '';
+            const notes = [];
+
+            for (let i = 0; i < ORDERED_CODES.length; i += 1) {
+                const decision = tableDecision(currentCode, numericAql);
+                if (decision.kind === 'plan') {
+                    const steps = buildSteps(planType, decision.sampleSize, decision.ac, numericLot);
+                    if (steps.reduce((sum, [n]) => sum + n, 0) < decision.sampleSize) notes.push('sample-capped-to-lot');
+                    return { ok: true, originalCode, finalCode: currentCode, arrowPath, steps, notes };
+                }
+
+                const idx = ORDERED_CODES.indexOf(currentCode);
+                if (decision.kind === 'down' && idx < ORDERED_CODES.length - 1) {
+                    currentCode = ORDERED_CODES[idx + 1];
+                    arrowPath += '↓';
+                    continue;
+                }
+                if (decision.kind === 'up' && idx > 0) {
+                    currentCode = ORDERED_CODES[idx - 1];
+                    arrowPath += '↑';
+                    continue;
+                }
+
+                const ac = decision.kind === 'up' ? 0 : Math.max(0, Math.floor((idx + AQL_VALUES.indexOf(numericAql) - 10) / 1.2));
+                const sampleSize = SIZES_SINGLE[currentCode];
+                const steps = buildSteps(planType, sampleSize, ac, numericLot);
+                notes.push(decision.kind === 'up' ? 'upper-boundary-clamped' : 'lower-boundary-clamped');
+                if (steps.reduce((sum, [n]) => sum + n, 0) < sampleSize) notes.push('sample-capped-to-lot');
+                return { ok: true, originalCode, finalCode: currentCode, arrowPath, steps, notes };
+            }
+
+            return { ok: false, reason: 'unresolved' };
+        }
 
         function updateCategory(cat) {
             currentCategory = cat;
             currentLevel = cat === 'general' ? 'II' : 'S-4';
-            
-            document.getElementById('btn-general').className = cat === 'general' ? "flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-blue-700" : "flex-1 py-2 rounded-lg font-bold text-sm text-slate-500";
-            document.getElementById('btn-special').className = cat === 'special' ? "flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-amber-700" : "flex-1 py-2 rounded-lg font-bold text-sm text-slate-500";
-            
+            document.getElementById('btn-general').className = cat === 'general' ? 'flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-blue-700' : 'flex-1 py-2 rounded-lg font-bold text-sm text-slate-500';
+            document.getElementById('btn-special').className = cat === 'special' ? 'flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow-sm text-amber-700' : 'flex-1 py-2 rounded-lg font-bold text-sm text-slate-500';
             renderLevels();
             calculate();
         }
@@ -155,14 +232,14 @@
         function renderLevels() {
             const container = document.getElementById('level-container');
             container.innerHTML = '';
-            const levels = currentCategory === 'general' 
-                ? [{id:'I', l:'מוקטנת'}, {id:'II', l:'רגילה'}, {id:'III', l:'מחמירה'}]
-                : [{id:'S-1', l:'S-1'}, {id:'S-2', l:'S-2'}, {id:'S-3', l:'S-3'}, {id:'S-4', l:'S-4'}];
-            
-            container.className = `grid ${currentCategory === 'general' ? 'grid-cols-3' : 'grid-cols-4'} gap-2`;
+            const levels = currentCategory === 'general'
+                ? [{ id: 'I', l: 'מוקטנת' }, { id: 'II', l: 'רגילה' }, { id: 'III', l: 'מחמירה' }]
+                : [{ id: 'S-1', l: 'S-1' }, { id: 'S-2', l: 'S-2' }, { id: 'S-3', l: 'S-3' }, { id: 'S-4', l: 'S-4' }];
 
+            container.className = `grid ${currentCategory === 'general' ? 'grid-cols-3' : 'grid-cols-4'} gap-2`;
             levels.forEach(lvl => {
                 const btn = document.createElement('button');
+                btn.type = 'button';
                 btn.textContent = lvl.l;
                 btn.onclick = () => { currentLevel = lvl.id; renderLevels(); calculate(); };
                 const isActive = currentLevel === lvl.id;
@@ -172,25 +249,27 @@
             });
         }
 
-        function getTableData(planType, code, aql) {
-            const codeIdx = ORDERED_CODES.indexOf(code);
-            const aqlIdx = AQL_VALUES.indexOf(aql);
-            if (aqlIdx < (10 - codeIdx) / 2.5) return 'D';
-            if (aqlIdx > (22 - codeIdx) / 1.5) return 'U';
-            let ac = Math.max(0, Math.floor((codeIdx + aqlIdx - 10) / 1.2));
-            let sampleSize = SIZES_SINGLE[code];
-            if (planType === 'single') return { steps: [[sampleSize, ac, ac + 1]] };
-            if (planType === 'double') {
-                const s = Math.ceil(sampleSize * 0.625);
-                return { steps: [[s, ac, ac + 2], [s, ac + 2, ac + 3]] };
+        function renderNotes(notes) {
+            const panel = document.getElementById('notes-panel');
+            const messages = [...new Set(notes)].map(note => NOTE_TEXT[note]).filter(Boolean);
+            if (!messages.length) {
+                panel.classList.add('hidden');
+                panel.innerHTML = '';
+                return;
             }
-            const s = Math.ceil(sampleSize * 0.25);
-            return { steps: [[s, -1, 2], [s, -1, 2], [s, 0, 2], [s, ac, ac + 2], [s, ac + 1, ac + 3], [s, ac + 2, ac + 4], [s, ac + 3, ac + 4]] };
+            panel.innerHTML = messages.map(msg => `<div>${msg}</div>`).join('');
+            panel.classList.remove('hidden');
         }
 
         function calculate() {
-            const lotSize = parseInt(document.getElementById('lotSize').value);
-            if (!lotSize || lotSize < 2) {
+            const lotInput = document.getElementById('lotSize');
+            const lotSize = Number(lotInput.value);
+            const planType = document.getElementById('planType').value;
+            const aql = Number(document.getElementById('aql').value);
+            const result = resolveSamplingPlan({ lotSize, level: currentLevel, planType, aql });
+
+            document.getElementById('lot-help').classList.toggle('hidden', lotInput.value === '' || result.ok);
+            if (!result.ok) {
                 document.getElementById('empty-state').classList.remove('hidden');
                 document.getElementById('content-state').classList.add('hidden');
                 return;
@@ -198,55 +277,72 @@
 
             document.getElementById('empty-state').classList.add('hidden');
             document.getElementById('content-state').classList.remove('hidden');
-
-            const range = LOT_SIZE_RANGES.find(r => lotSize >= r.min && lotSize <= r.max) || LOT_SIZE_RANGES[0];
-            const codeKey = currentLevel.replace('-', '');
-            let currentCode = range.codes[codeKey];
-            const originalCode = currentCode;
-            let arrowPath = "";
-            let planData = null;
-
-            for(let i=0; i<15; i++) {
-                let data = getTableData(document.getElementById('planType').value, currentCode, parseFloat(document.getElementById('aql').value));
-                if (typeof data === 'object') { planData = data; break; }
-                let idx = ORDERED_CODES.indexOf(currentCode);
-                if (data === 'D' && idx < 15) { currentCode = ORDERED_CODES[idx+1]; arrowPath += "↓"; }
-                else if (data === 'U' && idx > 0) { currentCode = ORDERED_CODES[idx-1]; arrowPath += "↑"; }
-                else break;
-            }
-
-            // Update UI
-            document.getElementById('res-orig-code').textContent = originalCode;
+            document.getElementById('res-orig-code').textContent = result.originalCode;
             document.getElementById('stat-cat').textContent = currentCategory === 'general' ? 'כללית' : 'מיוחדת';
             document.getElementById('stat-lvl').textContent = currentLevel;
-            document.getElementById('stat-aql').textContent = document.getElementById('aql').value + "%";
+            document.getElementById('stat-aql').textContent = `${aql}%`;
 
-            if (arrowPath) {
+            if (result.arrowPath) {
                 document.getElementById('arrow-box').style.display = 'flex';
-                document.getElementById('res-arrow').textContent = arrowPath;
-                document.getElementById('res-final-code').textContent = currentCode;
+                document.getElementById('res-arrow').textContent = result.arrowPath;
+                document.getElementById('res-final-code').textContent = result.finalCode;
             } else {
                 document.getElementById('arrow-box').style.display = 'none';
             }
 
+            renderNotes(result.notes);
+
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
-            let cum = 0;
-            planData.steps.forEach((s, i) => {
-                cum += s[0];
+            let cumulative = 0;
+            result.steps.forEach((step, index) => {
+                cumulative += step[0];
                 tbody.innerHTML += `
                     <tr>
-                        <td class="p-4 font-bold text-slate-400 italic">${i+1}</td>
-                        <td class="p-4 font-black text-2xl">${s[0]}</td>
-                        <td class="p-4 text-slate-400 font-bold">${cum}</td>
-                        <td class="p-4 bg-emerald-50 text-emerald-600 font-black text-3xl">${s[1] === -1 ? '--' : s[1]}</td>
-                        <td class="p-4 bg-rose-50 text-rose-600 font-black text-3xl">${s[2]}</td>
+                        <td class="p-4 font-bold text-slate-400 italic">${index + 1}</td>
+                        <td class="p-4 font-black text-2xl">${step[0]}</td>
+                        <td class="p-4 text-slate-400 font-bold">${cumulative}</td>
+                        <td class="p-4 bg-emerald-50 text-emerald-600 font-black text-3xl">${step[1] === -1 ? '--' : step[1]}</td>
+                        <td class="p-4 bg-rose-50 text-rose-600 font-black text-3xl">${step[2]}</td>
                     </tr>`;
             });
         }
 
+        function runSelfCheck() {
+            const lots = [2, 8, 9, 15, 16, 25, 26, 50, 51, 90, 91, 150, 151, 280, 281, 500, 501, 1200, 1201, 3200, 3201, 10000, 10001, 35000, 35001, 150000, 151001, 500000, 500001, 1000000];
+            const levels = ['I', 'II', 'III', 'S-1', 'S-2', 'S-3', 'S-4'];
+            const plans = ['single', 'double', 'multiple'];
+            const failures = [];
+            lots.forEach(lotSize => levels.forEach(level => plans.forEach(planType => AQL_VALUES.forEach(aql => {
+                const result = resolveSamplingPlan({ lotSize, level, planType, aql });
+                const sampled = result.ok ? result.steps.reduce((sum, [n]) => sum + n, 0) : 0;
+                if (!result.ok || !result.steps.length || sampled > lotSize) failures.push({ lotSize, level, planType, aql, result });
+            }))));
+            const pill = document.getElementById('self-check-pill');
+            pill.classList.remove('hidden');
+            if (failures.length) {
+                pill.textContent = `בדיקה נכשלה: ${failures.length}`;
+                pill.className = 'text-xs font-black px-3 py-1 rounded-full border border-rose-400 text-rose-200';
+                console.error('MIL-STD-105E calculator self-check failures', failures);
+            } else {
+                pill.textContent = 'בדיקת קצה עברה';
+                pill.className = 'text-xs font-black px-3 py-1 rounded-full border border-emerald-400 text-emerald-200';
+                console.info('MIL-STD-105E calculator self-check passed');
+            }
+        }
+
+        const aqlSelect = document.getElementById('aql');
+        AQL_VALUES.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v;
+            opt.textContent = v;
+            if (v === 2.5) opt.selected = true;
+            aqlSelect.appendChild(opt);
+        });
+
         document.getElementById('lotSize').addEventListener('input', calculate);
         renderLevels();
+        runSelfCheck();
     </script>
 </body>
 </html>
